@@ -418,7 +418,7 @@ export class SpeechUtils {
     const text = `${letterData.letter}... as in ${letterData.exampleWord}!`;
     
     speechSynthesis.speak(text, {
-      rate: 0.7,
+      rate: 0.6,
       pitch: 1.2,
       volume: this.currentVolume,
       language: 'en-US',
@@ -436,7 +436,7 @@ export class SpeechUtils {
     if (!letterData) return;
 
     speechSynthesis.speak(letterData.letter, {
-      rate: 0.8,
+      rate: 0.7,
       pitch: 1.1,
       volume: this.currentVolume,
       language: 'en-US'
@@ -451,7 +451,7 @@ export class SpeechUtils {
     if (!letterData) return;
 
     speechSynthesis.speak(letterData.phonetic, {
-      rate: 0.6,
+      rate: 0.5,
       pitch: 1.3,
       volume: this.currentVolume,
       language: 'en-US'
@@ -466,7 +466,7 @@ export class SpeechUtils {
     if (!letterData) return;
 
     speechSynthesis.speak(letterData.exampleWord, {
-      rate: 0.7,
+      rate: 0.6,
       pitch: 1.0,
       volume: this.currentVolume,
       language: 'en-US'
@@ -481,7 +481,7 @@ export class SpeechUtils {
     if (!letterData) return;
 
     speechSynthesis.speak(letterData.description, {
-      rate: 0.7,
+      rate: 0.6,
       pitch: 1.1,
       volume: this.currentVolume,
       language: 'en-US'
@@ -494,7 +494,7 @@ export class SpeechUtils {
 
     const alphabet = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z';
     speechSynthesis.speak(alphabet, {
-      rate: 0.6,
+      rate: 0.5,
       pitch: 1.2,
       volume: this.currentVolume,
       language: 'en-US'
@@ -518,7 +518,7 @@ export class SpeechUtils {
 
     const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
     speechSynthesis.speak(randomMessage, {
-      rate: 0.8,
+      rate: 0.7,
       pitch: 1.3,
       volume: this.currentVolume,
       language: 'en-US'
@@ -542,7 +542,7 @@ export class SpeechUtils {
 
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     speechSynthesis.speak(randomMessage, {
-      rate: 0.7,
+      rate: 0.6,
       pitch: 1.1,
       volume: this.currentVolume,
       language: 'en-US'
@@ -554,7 +554,7 @@ export class SpeechUtils {
     if (!this.isEnabled) return;
 
     speechSynthesis.speak('Let\'s practice the alphabet! Tap each letter to hear its sound.', {
-      rate: 0.7,
+      rate: 0.6,
       pitch: 1.0,
       volume: this.currentVolume,
       language: 'en-US'
@@ -566,7 +566,7 @@ export class SpeechUtils {
     if (!this.isEnabled) return;
 
     speechSynthesis.speak('Welcome to the alphabet story! Let\'s sing the alphabet together.', {
-      rate: 0.7,
+      rate: 0.6,
       pitch: 1.1,
       volume: this.currentVolume,
       language: 'en-US'

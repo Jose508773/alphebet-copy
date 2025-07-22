@@ -183,6 +183,19 @@ export default function LetterDetailPopup({
             
             <Pressable
               style={[
+                styles.replayButton,
+                {
+                  backgroundColor: COLORS.brightGreen,
+                },
+              ]}
+              onPress={handleReplay}
+              accessibilityLabel="Replay letter pronunciation"
+            >
+              <Text style={styles.replayButtonText}>🔊 Replay</Text>
+            </Pressable>
+
+            <Pressable
+              style={[
                 styles.closeButton,
                 {
                   backgroundColor: COLORS.accent,
@@ -359,25 +372,28 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   replayButton: {
-    marginTop: 15,
-    backgroundColor: COLORS.secondary,
     borderRadius: 30,
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     paddingVertical: 15,
-    shadowColor: COLORS.secondary,
+    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: COLORS.secondary,
-    zIndex: 2,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    elevation: 8,
   },
   replayButtonText: {
     color: COLORS.white,
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     fontFamily: FONTS.heading,
+    textAlign: 'center',
+    textShadowColor: COLORS.shadow,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
+
   captionText: {
     fontSize: 30,
     color: COLORS.brightPurple,
