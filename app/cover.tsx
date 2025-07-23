@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -18,10 +18,56 @@ const { width, height } = Dimensions.get('window');
 export default function CoverPage() {
   const [buttonPressed, setButtonPressed] = useState(false);
   const { highContrast } = useAccessibility();
+  
+  // Animation refs
+  const titleAnim = useRef(new Animated.Value(0)).current;
+  const cardAnim = useRef(new Animated.Value(0)).current;
+  const buttonAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  // Start animations on mount
+  useEffect(() => {
+    const animations = [
+      Animated.timing(titleAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardAnim, {
+        toValue: 1,
+        duration: 1000,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonAnim, {
+        toValue: 1,
+        duration: 1200,
+        delay: 600,
+        useNativeDriver: true,
+      }),
+    ];
+    
+    Animated.parallel(animations).start();
+  }, []);
 
   const handleStartLearning = () => {
     setButtonPressed(true);
-    // Navigate to the main app after a brief animation
+    
+    // Button press animation
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
+    // Navigate to the main app after animation
     setTimeout(() => {
       router.replace('/(tabs)');
     }, 300);
@@ -37,15 +83,41 @@ export default function CoverPage() {
       <View style={styles.content}>
         {/* Main Title Section */}
         <View style={styles.titleSection}>
-          <View style={styles.titleContainer}>
+          <Animated.View 
+            style={[
+              styles.titleContainer,
+              {
+                opacity: titleAnim,
+                transform: [{
+                  translateY: titleAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
             <Text style={styles.mainTitle}>🎓 Alphabet Learning</Text>
             <Text style={styles.subtitle}>Interactive & Fun</Text>
-          </View>
+          </Animated.View>
         </View>
 
         {/* Single Description Section */}
         <View style={styles.descriptionSection}>
-          <View style={styles.descriptionCard}>
+          <Animated.View 
+            style={[
+              styles.descriptionCard,
+              {
+                opacity: cardAnim,
+                transform: [{
+                  translateY: cardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [100, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
             <Text style={styles.descriptionTitle}>Welcome to Your Learning Adventure!</Text>
             
             <Text style={styles.descriptionText}>
@@ -66,36 +138,48 @@ export default function CoverPage() {
             <Text style={styles.instructionText}>
               Ready to start your alphabet journey? Click the button below to begin exploring all 26 letters!
             </Text>
-          </View>
+          </Animated.View>
         </View>
 
         {/* Start Learning Button */}
         <View style={styles.buttonSection}>
-          <Pressable
+          <Animated.View
             style={[
-              styles.startButton,
-              buttonPressed && styles.startButtonPressed
+              {
+                opacity: buttonAnim,
+                transform: [
+                  {
+                    translateY: buttonAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [50, 0],
+                    }),
+                  },
+                  {
+                    scale: scaleAnim,
+                  },
+                ],
+              },
             ]}
-            onPress={handleStartLearning}
-            accessibilityLabel="Start learning the alphabet"
-            accessibilityRole="button"
           >
-            <View style={styles.buttonGradient}>
-              <Animated.Text style={[
-                styles.startButtonText,
-                buttonPressed && styles.startButtonTextPressed
-              ]}>
-                🚀 Start Learning
-              </Animated.Text>
-            </View>
-          </Pressable>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Made with ❤️ for learning
-          </Text>
+            <Pressable
+              style={[
+                styles.startButton,
+                buttonPressed && styles.startButtonPressed
+              ]}
+              onPress={handleStartLearning}
+              accessibilityLabel="Start learning the alphabet"
+              accessibilityRole="button"
+            >
+              <View style={styles.buttonGradient}>
+                <Animated.Text style={[
+                  styles.startButtonText,
+                  buttonPressed && styles.startButtonTextPressed
+                ]}>
+                  🚀 Start Learning
+                </Animated.Text>
+              </View>
+            </Pressable>
+          </Animated.View>
         </View>
       </View>
     </View>
@@ -118,18 +202,20 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 30,
-    paddingTop: 80,
+    paddingHorizontal: 20,
+    paddingTop: 60,
     paddingBottom: 40,
     justifyContent: 'space-between',
     zIndex: 2,
   },
   titleSection: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
+    flex: 0.2,
+    justifyContent: 'center',
   },
   titleContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 25,
     paddingHorizontal: 30,
     paddingVertical: 20,
@@ -140,7 +226,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   mainTitle: {
-    fontSize: 42,
+    fontSize: 46,
     fontWeight: 'bold',
     color: COLORS.primary,
     textAlign: 'center',
@@ -151,17 +237,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 24,
+    fontSize: 26,
     color: COLORS.secondary,
     textAlign: 'center',
     fontFamily: FONTS.body,
     fontWeight: '600',
   },
   descriptionSection: {
-    flex: 1,
+    flex: 0.6,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   descriptionCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -175,10 +261,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.primary,
     width: '100%',
-    maxWidth: 500,
+    maxWidth: 550,
   },
   descriptionTitle: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     color: COLORS.primary,
     textAlign: 'center',
@@ -189,11 +275,11 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   descriptionText: {
-    fontSize: 18,
+    fontSize: 20,
     color: COLORS.primaryText,
     textAlign: 'center',
     fontFamily: FONTS.body,
-    lineHeight: 26,
+    lineHeight: 28,
     marginBottom: 25,
   },
   featuresContainer: {
@@ -205,23 +291,24 @@ const styles = StyleSheet.create({
     borderLeftColor: COLORS.primary,
   },
   featuresText: {
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.primaryText,
     textAlign: 'left',
     fontFamily: FONTS.body,
-    lineHeight: 24,
+    lineHeight: 26,
   },
   instructionText: {
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.secondary,
     textAlign: 'center',
     fontFamily: FONTS.body,
     fontWeight: '600',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   buttonSection: {
     alignItems: 'center',
-    marginTop: 30,
+    flex: 0.2,
+    justifyContent: 'center',
   },
   startButton: {
     borderRadius: 30,
@@ -232,20 +319,20 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderWidth: 3,
     borderColor: COLORS.primary,
-    minWidth: 280,
+    minWidth: 300,
     overflow: 'hidden',
   },
   buttonGradient: {
     backgroundColor: COLORS.accent,
-    paddingHorizontal: 50,
-    paddingVertical: 20,
+    paddingHorizontal: 60,
+    paddingVertical: 25,
   },
   startButtonPressed: {
-    transform: [{ scale: 0.95 }],
+    backgroundColor: COLORS.brightGreen,
   },
   startButtonText: {
     color: COLORS.white,
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     fontFamily: FONTS.heading,
@@ -255,16 +342,5 @@ const styles = StyleSheet.create({
   },
   startButtonTextPressed: {
     color: COLORS.white,
-  },
-  footer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  footerText: {
-    fontSize: 14,
-    color: COLORS.primaryText,
-    textAlign: 'center',
-    fontFamily: FONTS.body,
-    opacity: 0.7,
   },
 }); 
