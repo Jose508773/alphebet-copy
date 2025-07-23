@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -10,42 +10,106 @@ import {
 import { COLORS } from '../constants/StyleGuide';
 import { useAccessibility } from '../constants/AccessibilityContext';
 import { LETTER_EMOJI } from '../constants/StyleGuide';
-import { speechUtils } from '../utils/SpeechUtils';
+import { speechUtils, LETTER_DATA, speechSynthesis } from '../utils/SpeechUtils';
 
 const LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
+// Generate multiple choice options
+const generateOptions = (correctLetter: string): string[] => {
+  const options = [correctLetter];
+  const allLetters = [...LETTERS];
+  const correctIndex = allLetters.indexOf(correctLetter);
+  
+  // Remove the correct letter from the pool
+  allLetters.splice(correctIndex, 1);
+  
+  // Add 3 random wrong answers
+  for (let i = 0; i < 3; i++) {
+    const randomIndex = Math.floor(Math.random() * allLetters.length);
+    options.push(allLetters[randomIndex]);
+    allLetters.splice(randomIndex, 1);
+  }
+  
+  // Shuffle the options
+  return options.sort(() => Math.random() - 0.5);
+};
+
 export const PracticeMode: React.FC<{ onHome: () => void }> = ({ onHome }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [currentLetter, setCurrentLetter] = useState(LETTERS[0]);
+  const [options, setOptions] = useState<string[]>([]);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [score, setScore] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
   const { highContrast } = useAccessibility();
 
-  const handleNext = () => {
-    setShowSuccess(false);
-    setCurrentIndex((idx) => (idx < LETTERS.length - 1 ? idx + 1 : idx));
-    // Speak the next letter
-    const nextIndex = currentIndex < LETTERS.length - 1 ? currentIndex + 1 : currentIndex;
-    speechUtils.speakLetter(LETTERS[nextIndex]);
+  // Initialize or reset the quiz
+  const generateNewQuestion = () => {
+    const randomLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+    setCurrentLetter(randomLetter);
+    setOptions(generateOptions(randomLetter));
+    setSelectedAnswer(null);
+    setIsCorrect(null);
+    setShowFeedback(false);
   };
-  const handleBack = () => {
-    setShowSuccess(false);
-    setCurrentIndex((idx) => (idx > 0 ? idx - 1 : 0));
-    // Speak the previous letter
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : 0;
-    speechUtils.speakLetter(LETTERS[prevIndex]);
+
+  // Start the quiz when component mounts
+  useEffect(() => {
+    generateNewQuestion();
+  }, []);
+
+  // Ask the question with speech
+  const askQuestion = () => {
+    const letterData = LETTER_DATA[currentLetter];
+    if (letterData) {
+      const question = `What letter makes the "${letterData.phonetic}" sound?`;
+      speechSynthesis.speak(question, {
+        rate: 0.6,
+        pitch: 1.1,
+        volume: 1.0,
+        language: 'en-US'
+      });
+    }
   };
-  const handleLetterTap = (letter: string) => {
-    if (letter === LETTERS[currentIndex]) {
-      setShowSuccess(true);
+
+  // Handle answer selection
+  const handleAnswerSelect = (selectedLetter: string) => {
+    setSelectedAnswer(selectedLetter);
+    const correct = selectedLetter === currentLetter;
+    setIsCorrect(correct);
+    setShowFeedback(true);
+    setTotalQuestions(prev => prev + 1);
+    
+    if (correct) {
+      setScore(prev => prev + 1);
       speechUtils.speakSuccess();
     } else {
       speechUtils.speakEncouragement();
     }
   };
 
+  // Handle next question
+  const handleNextQuestion = () => {
+    generateNewQuestion();
+    setTimeout(() => {
+      askQuestion();
+    }, 500);
+  };
+
+  // Ask question when current letter changes
+  useEffect(() => {
+    if (currentLetter && !selectedAnswer) {
+      setTimeout(() => {
+        askQuestion();
+      }, 1000);
+    }
+  }, [currentLetter]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Practice Mode</Text>
+        <Text style={styles.title}>Quiz Mode</Text>
         <Pressable
           style={styles.homeButton}
           onPress={onHome}
@@ -54,43 +118,74 @@ export const PracticeMode: React.FC<{ onHome: () => void }> = ({ onHome }) => {
           <Text style={styles.homeButtonText}>🏠</Text>
         </Pressable>
       </View>
-      <View style={styles.practiceArea}>
-        <Text style={styles.currentLetter}>
-          {LETTERS[currentIndex]}
+
+      <View style={styles.scoreContainer}>
+        <Text style={styles.scoreText}>Score: {score}/{totalQuestions}</Text>
+      </View>
+
+      <View style={styles.questionArea}>
+        <Text style={styles.questionText}>
+          What letter makes the &quot;{LETTER_DATA[currentLetter]?.phonetic}&quot; sound?
         </Text>
+        
         <Pressable
-          style={({ pressed }) => [
-            styles.practiceLetter,
-            pressed && styles.practiceLetterPressed,
-          ]}
-          onPress={() => handleLetterTap(LETTERS[currentIndex])}
-          accessibilityLabel={`Practice letter ${LETTERS[currentIndex]}`}
-          accessibilityRole="button"
+          style={styles.replayButton}
+          onPress={askQuestion}
+          accessibilityLabel="Replay question"
         >
-          <Text style={styles.practiceLetterText}>{LETTERS[currentIndex]}</Text>
-        </Pressable>
-        {showSuccess && (
-          <View style={styles.successEffect}>
-            <Text style={styles.successText}>⭐ Great! ⭐</Text>
-          </View>
-        )}
-      </View>
-      <View style={styles.controls}>
-        <Pressable
-          style={styles.controlButton}
-          onPress={handleBack}
-          accessibilityLabel="Previous letter"
-        >
-          <Text style={styles.controlIcon}>←</Text>
-        </Pressable>
-        <Pressable
-          style={styles.controlButton}
-          onPress={handleNext}
-          accessibilityLabel="Next letter"
-        >
-          <Text style={styles.controlIcon}>→</Text>
+          <Text style={styles.replayButtonText}>🔊 Replay Question</Text>
         </Pressable>
       </View>
+
+      <View style={styles.optionsContainer}>
+        {options.map((option, index) => (
+          <Pressable
+            key={index}
+            style={[
+              styles.optionButton,
+              selectedAnswer === option && isCorrect && styles.correctAnswer,
+              selectedAnswer === option && !isCorrect && styles.wrongAnswer,
+              selectedAnswer && option === currentLetter && styles.correctAnswer,
+            ]}
+            onPress={() => !selectedAnswer && handleAnswerSelect(option)}
+            disabled={selectedAnswer !== null}
+            accessibilityLabel={`Option ${index + 1}: ${option}`}
+          >
+            <Text style={[
+              styles.optionText,
+              selectedAnswer === option && isCorrect && styles.correctAnswerText,
+              selectedAnswer === option && !isCorrect && styles.wrongAnswerText,
+              selectedAnswer && option === currentLetter && styles.correctAnswerText,
+            ]}>
+              {option}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {showFeedback && (
+        <View style={styles.feedbackContainer}>
+          <Text style={[
+            styles.feedbackText,
+            isCorrect ? styles.correctFeedback : styles.wrongFeedback
+          ]}>
+            {isCorrect ? '✅ Correct!' : '❌ Wrong!'}
+          </Text>
+          <Text style={styles.explanationText}>
+            {isCorrect 
+              ? `Great job! ${currentLetter} makes the "${LETTER_DATA[currentLetter]?.phonetic}" sound.`
+              : `The correct answer is ${currentLetter}. ${currentLetter} makes the "${LETTER_DATA[currentLetter]?.phonetic}" sound.`
+            }
+          </Text>
+          <Pressable
+            style={styles.nextButton}
+            onPress={handleNextQuestion}
+            accessibilityLabel="Next question"
+          >
+            <Text style={styles.nextButtonText}>Next Question →</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 };
@@ -108,7 +203,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: COLORS.primary,
   },
@@ -121,74 +216,106 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: COLORS.white,
   },
-  practiceArea: {
-    flex: 1,
+  scoreContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  currentLetter: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: COLORS.brightPurple,
     marginBottom: 20,
   },
-  practiceLetter: {
-    backgroundColor: COLORS.secondary,
-    borderRadius: 15,
-    padding: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 3,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  practiceLetterPressed: {
-    opacity: 0.8,
-  },
-  practiceLetterText: {
-    fontSize: 64,
-    color: COLORS.white,
-    textShadowColor: COLORS.shadow,
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 3,
-  },
-  successEffect: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-  },
-  successText: {
-    fontSize: 28,
-    color: COLORS.brightGreen,
+  scoreText: {
+    fontSize: 20,
     fontWeight: 'bold',
-    textShadowColor: COLORS.shadow,
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 3,
+    color: COLORS.brightPurple,
   },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
+  questionArea: {
+    alignItems: 'center',
+    marginBottom: 30,
   },
-  controlButton: {
-    backgroundColor: COLORS.primary,
-    padding: 15,
-    borderRadius: 10,
-    elevation: 2,
+  questionText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  replayButton: {
+    backgroundColor: COLORS.brightBlue,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginTop: 10,
+  },
+  replayButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  optionsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 15,
+  },
+  optionButton: {
+    backgroundColor: COLORS.white,
+    borderRadius: 15,
+    padding: 20,
+    marginHorizontal: 20,
+    alignItems: 'center',
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  controlIcon: {
-    fontSize: 28,
+  optionText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  correctAnswer: {
+    backgroundColor: COLORS.brightGreen,
+  },
+  correctAnswerText: {
     color: COLORS.white,
+  },
+  wrongAnswer: {
+    backgroundColor: COLORS.brightRed,
+  },
+  wrongAnswerText: {
+    color: COLORS.white,
+  },
+  feedbackContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: COLORS.pastelLavender,
+    borderRadius: 15,
+    marginHorizontal: 20,
+  },
+  feedbackText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  correctFeedback: {
+    color: COLORS.brightGreen,
+  },
+  wrongFeedback: {
+    color: COLORS.brightRed,
+  },
+  explanationText: {
+    fontSize: 16,
+    color: COLORS.primary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  nextButton: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+  },
+  nextButtonText: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
