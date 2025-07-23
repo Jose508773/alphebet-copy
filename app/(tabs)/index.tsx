@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, Platform, Modal, Switch } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Animated } from 'react-native';
+import { router } from 'expo-router';
 import LetterDetailPopup from '../../components/LetterDetailPopup';
 import { PracticeMode } from '../../components/PracticeMode';
 import { StorySongMode } from '../../components/StorySongMode';
@@ -100,6 +101,16 @@ export default function LetterGridScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <Pressable
+          style={styles.backButton}
+          onPress={() => router.push('/cover')}
+          accessibilityLabel="Back to cover page"
+        >
+          <Text style={styles.backButtonText}>🏠 Home</Text>
+        </Pressable>
+      </View>
       {/* Fun confetti background */}
       <View style={styles.confettiBg} pointerEvents="none" />
       <Animated.FlatList
@@ -339,6 +350,34 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  backButton: {
+    backgroundColor: COLORS.secondary,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignSelf: 'flex-start',
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  backButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.heading,
   },
   highContrastBg: {
     backgroundColor: '#000',
