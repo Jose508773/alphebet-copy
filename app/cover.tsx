@@ -31,44 +31,40 @@ export default function CoverPage() {
     <View style={styles.container}>
       <AnimatedBackground />
       
+      {/* Gradient Overlay */}
+      <View style={styles.gradientOverlay} />
+      
       <View style={styles.content}>
-        {/* App Title */}
+        {/* Main Title Section */}
         <View style={styles.titleSection}>
-          <Text style={styles.mainTitle}>🎓 Alphabet Learning</Text>
-          <Text style={styles.subtitle}>Interactive & Fun</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.mainTitle}>🎓 Alphabet Learning</Text>
+            <Text style={styles.subtitle}>Interactive & Fun</Text>
+          </View>
         </View>
 
-        {/* App Description */}
+        {/* Single Description Section */}
         <View style={styles.descriptionSection}>
-          <View style={styles.featureCard}>
-            <Text style={styles.featureIcon}>🔤</Text>
-            <Text style={styles.featureTitle}>Learn Letters</Text>
-            <Text style={styles.featureDescription}>
-              Explore all 26 letters with interactive buttons and voice pronunciation
+          <View style={styles.descriptionCard}>
+            <Text style={styles.descriptionTitle}>Welcome to Your Learning Adventure!</Text>
+            
+            <Text style={styles.descriptionText}>
+              Discover the magical world of letters through our interactive alphabet learning app. 
+              Perfect for children and anyone eager to master the ABCs in a fun, engaging way.
             </Text>
-          </View>
-
-          <View style={styles.featureCard}>
-            <Text style={styles.featureIcon}>🎯</Text>
-            <Text style={styles.featureTitle}>Quiz Mode</Text>
-            <Text style={styles.featureDescription}>
-              Test your knowledge with voice-guided quizzes and multiple choice answers
-            </Text>
-          </View>
-
-          <View style={styles.featureCard}>
-            <Text style={styles.featureIcon}>🎵</Text>
-            <Text style={styles.featureTitle}>Story & Song</Text>
-            <Text style={styles.featureDescription}>
-              Enjoy alphabet stories and songs for a complete learning experience
-            </Text>
-          </View>
-
-          <View style={styles.featureCard}>
-            <Text style={styles.featureIcon}>🔊</Text>
-            <Text style={styles.featureTitle}>Voice Learning</Text>
-            <Text style={styles.featureDescription}>
-              Clear pronunciation and audio feedback for better understanding
+            
+            <View style={styles.featuresContainer}>
+              <Text style={styles.featuresText}>
+                ✨ Interactive letter buttons with voice pronunciation{'\n'}
+                🎯 Quiz mode with voice-guided questions{'\n'}
+                🎵 Story and song mode for complete learning{'\n'}
+                🔊 Clear audio feedback and pronunciation{'\n'}
+                🎨 Beautiful, colorful design that makes learning fun
+              </Text>
+            </View>
+            
+            <Text style={styles.instructionText}>
+              Ready to start your alphabet journey? Click the button below to begin exploring all 26 letters!
             </Text>
           </View>
         </View>
@@ -84,12 +80,14 @@ export default function CoverPage() {
             accessibilityLabel="Start learning the alphabet"
             accessibilityRole="button"
           >
-            <Animated.Text style={[
-              styles.startButtonText,
-              buttonPressed && styles.startButtonTextPressed
-            ]}>
-              🚀 Start Learning
-            </Animated.Text>
+            <View style={styles.buttonGradient}>
+              <Animated.Text style={[
+                styles.startButtonText,
+                buttonPressed && styles.startButtonTextPressed
+              ]}>
+                🚀 Start Learning
+              </Animated.Text>
+            </View>
           </Pressable>
         </View>
 
@@ -109,19 +107,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.pastelMint,
   },
+  gradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    zIndex: 1,
+  },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingHorizontal: 30,
+    paddingTop: 80,
     paddingBottom: 40,
     justifyContent: 'space-between',
+    zIndex: 2,
   },
   titleSection: {
     alignItems: 'center',
     marginBottom: 40,
   },
+  titleContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 25,
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   mainTitle: {
-    fontSize: 36,
+    fontSize: 42,
     fontWeight: 'bold',
     color: COLORS.primary,
     textAlign: 'center',
@@ -132,7 +151,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: 24,
     color: COLORS.secondary,
     textAlign: 'center',
     fontFamily: FONTS.body,
@@ -141,66 +160,92 @@ const styles = StyleSheet.create({
   descriptionSection: {
     flex: 1,
     justifyContent: 'center',
-    gap: 20,
-  },
-  featureCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 20,
-    padding: 20,
-    marginHorizontal: 10,
     alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  descriptionCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 25,
+    padding: 30,
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 12,
     borderWidth: 2,
     borderColor: COLORS.primary,
+    width: '100%',
+    maxWidth: 500,
   },
-  featureIcon: {
-    fontSize: 40,
-    marginBottom: 10,
-  },
-  featureTitle: {
-    fontSize: 18,
+  descriptionTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
     color: COLORS.primary,
     textAlign: 'center',
     fontFamily: FONTS.heading,
-    marginBottom: 8,
+    marginBottom: 20,
+    textShadowColor: COLORS.shadow,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
-  featureDescription: {
-    fontSize: 14,
+  descriptionText: {
+    fontSize: 18,
     color: COLORS.primaryText,
     textAlign: 'center',
     fontFamily: FONTS.body,
-    lineHeight: 20,
+    lineHeight: 26,
+    marginBottom: 25,
+  },
+  featuresContainer: {
+    backgroundColor: COLORS.pastelLavender,
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 25,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+  },
+  featuresText: {
+    fontSize: 16,
+    color: COLORS.primaryText,
+    textAlign: 'left',
+    fontFamily: FONTS.body,
+    lineHeight: 24,
+  },
+  instructionText: {
+    fontSize: 16,
+    color: COLORS.secondary,
+    textAlign: 'center',
+    fontFamily: FONTS.body,
+    fontWeight: '600',
+    lineHeight: 22,
   },
   buttonSection: {
     alignItems: 'center',
     marginTop: 30,
   },
   startButton: {
-    backgroundColor: COLORS.accent,
     borderRadius: 30,
-    paddingHorizontal: 40,
-    paddingVertical: 20,
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
-    shadowRadius: 10,
+    shadowRadius: 12,
     elevation: 12,
     borderWidth: 3,
     borderColor: COLORS.primary,
-    minWidth: 200,
+    minWidth: 280,
+    overflow: 'hidden',
+  },
+  buttonGradient: {
+    backgroundColor: COLORS.accent,
+    paddingHorizontal: 50,
+    paddingVertical: 20,
   },
   startButtonPressed: {
-    backgroundColor: COLORS.brightGreen,
     transform: [{ scale: 0.95 }],
   },
   startButtonText: {
     color: COLORS.white,
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     textAlign: 'center',
     fontFamily: FONTS.heading,
