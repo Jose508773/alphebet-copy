@@ -196,7 +196,7 @@ export default function LetterDetailPopup({
 
             <Pressable
               style={[
-                styles.closeButton,
+                styles.navButton,
                 {
                   backgroundColor: COLORS.accent,
                 },
@@ -221,7 +221,7 @@ export default function LetterDetailPopup({
             >
               <Animated.Text
                 style={[
-                  styles.closeButtonText,
+                  styles.navButtonText,
                   {
                     transform: [
                       { scale: letterAnim.interpolate({
