@@ -26,6 +26,9 @@
         "babel": {
           "include": ["@expo/vector-icons"]
         }
+      },
+      "router": {
+        "mode": "hash"
       }
     },
     "plugins": [
