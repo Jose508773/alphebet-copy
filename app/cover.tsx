@@ -32,9 +32,10 @@ export default function CoverPage() {
   const buttonHoverAnim = useRef(new Animated.Value(1)).current;
   
   // Letter-by-letter animation refs
+  const titleText = "🎓 Alphabet Learning";
   const letterAnims = useRef(
-    Array.from({ length: 18 }, () => new Animated.Value(0))
-  ).current; // "🎓 Alphabet Learning" has 18 characters
+    Array.from({ length: titleText.length }, () => new Animated.Value(0))
+  ).current;
 
   // Start animations on mount
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function CoverPage() {
     ];
     
     // Letter-by-letter staggered animation
-    const letterAnimations = letterAnims.map((anim, index) =>
+    const letterAnimations = letterAnims.slice(0, titleText.length).map((anim, index) =>
       Animated.timing(anim, {
         toValue: 1,
         duration: 300,
@@ -155,28 +156,31 @@ export default function CoverPage() {
 
   // Render letters with staggered animation
   const renderAnimatedTitle = () => {
-    const titleText = "🎓 Alphabet Learning";
     return (
       <View style={styles.animatedTitleContainer}>
-        {titleText.split('').map((char, index) => (
-          <Animated.Text
-            key={index}
-            style={[
-              styles.animatedLetter,
-              {
-                opacity: letterAnims[index],
-                transform: [{
-                  translateY: letterAnims[index].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
-            {char === ' ' ? '\u00A0' : char}
-          </Animated.Text>
-        ))}
+        {titleText.split('').map((char, index) => {
+          // Safety check to ensure animated value exists
+          const animValue = letterAnims[index] || new Animated.Value(0);
+          return (
+            <Animated.Text
+              key={index}
+              style={[
+                styles.animatedLetter,
+                {
+                  opacity: animValue,
+                  transform: [{
+                    translateY: animValue.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  }],
+                },
+              ]}
+            >
+              {char === ' ' ? '\u00A0' : char}
+            </Animated.Text>
+          );
+        })}
       </View>
     );
   };
@@ -419,22 +423,23 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 30,
+    paddingHorizontal: 16,
+    paddingTop: 40,
+    paddingBottom: 20,
     zIndex: 2,
+    justifyContent: 'space-between',
   },
   titleSection: {
     alignItems: 'center',
-    marginBottom: 50,
-    flex: 0.15,
+    marginBottom: 30,
+    flex: 0.18,
     justifyContent: 'center',
   },
   titleContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 25,
-    paddingHorizontal: 30,
-    paddingVertical: 20,
+    borderRadius: 20,
+    paddingHorizontal: 25,
+    paddingVertical: 16,
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -442,15 +447,17 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 2,
     borderColor: COLORS.primary,
+    width: '95%',
+    maxWidth: 600,
   },
   animatedTitleContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   animatedLetter: {
-    fontSize: 42,
+    fontSize: 36,
     fontWeight: 'bold',
     color: COLORS.primary,
     fontFamily: FONTS.heading,
@@ -459,23 +466,23 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   subtitle: {
-    fontSize: 24,
+    fontSize: 22,
     color: COLORS.secondary,
     textAlign: 'center',
     fontFamily: FONTS.body,
     fontWeight: '600',
   },
   descriptionSection: {
-    flex: 0.45,
+    flex: 0.55,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    marginBottom: 30,
+    paddingHorizontal: 8,
+    marginBottom: 25,
   },
   descriptionCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 25,
-    padding: 25,
+    borderRadius: 20,
+    padding: 24,
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
@@ -483,33 +490,34 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderWidth: 2,
     borderColor: COLORS.primary,
-    width: '100%',
-    maxWidth: 520,
+    width: '98%',
+    maxWidth: 650,
+    minHeight: 320,
   },
   descriptionTitle: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
     color: COLORS.primary,
     textAlign: 'center',
     fontFamily: FONTS.heading,
-    marginBottom: 18,
+    marginBottom: 16,
     textShadowColor: COLORS.shadow,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   descriptionText: {
-    fontSize: 18,
+    fontSize: 17,
     color: COLORS.primaryText,
     textAlign: 'center',
     fontFamily: FONTS.body,
-    lineHeight: 26,
-    marginBottom: 20,
+    lineHeight: 24,
+    marginBottom: 18,
   },
   featuresContainer: {
     backgroundColor: COLORS.pastelLavender,
     borderRadius: 15,
-    padding: 18,
-    marginBottom: 20,
+    padding: 20,
+    marginBottom: 18,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
     shadowColor: COLORS.shadow,
@@ -517,27 +525,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+    minHeight: 140,
   },
   featuresText: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.primaryText,
     textAlign: 'left',
     fontFamily: FONTS.body,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   instructionText: {
-    fontSize: 17,
+    fontSize: 16,
     color: COLORS.secondary,
     textAlign: 'center',
     fontFamily: FONTS.body,
     fontWeight: '600',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   buttonSection: {
     alignItems: 'center',
-    flex: 0.4,
+    flex: 0.27,
     justifyContent: 'flex-end',
-    paddingBottom: 50,
+    paddingBottom: 30,
+    paddingTop: 10,
   },
   startButton: {
     borderRadius: 35,
