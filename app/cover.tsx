@@ -205,13 +205,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 40,
-    justifyContent: 'space-between',
     zIndex: 2,
   },
   titleSection: {
     alignItems: 'center',
-    marginBottom: 30,
-    flex: 0.2,
+    marginBottom: 40,
+    flex: 0.25,
     justifyContent: 'center',
   },
   titleContainer: {
@@ -224,6 +223,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
   },
   mainTitle: {
     fontSize: 46,
@@ -244,10 +245,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   descriptionSection: {
-    flex: 0.6,
+    flex: 0.55,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
+    marginBottom: 20,
   },
   descriptionCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -289,6 +291,12 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
+    // Add subtle gradient effect
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   featuresText: {
     fontSize: 18,
