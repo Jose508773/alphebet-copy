@@ -209,8 +209,8 @@ const styles = StyleSheet.create({
   },
   titleSection: {
     alignItems: 'center',
-    marginBottom: 40,
-    flex: 0.25,
+    marginBottom: 60,
+    flex: 0.2,
     justifyContent: 'center',
   },
   titleContainer: {
@@ -245,11 +245,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   descriptionSection: {
-    flex: 0.55,
+    flex: 0.5,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 10,
-    marginBottom: 20,
+    marginBottom: 40,
   },
   descriptionCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -291,7 +291,6 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
-    // Add subtle gradient effect
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -315,8 +314,9 @@ const styles = StyleSheet.create({
   },
   buttonSection: {
     alignItems: 'center',
-    flex: 0.2,
-    justifyContent: 'center',
+    flex: 0.3,
+    justifyContent: 'flex-end',
+    paddingBottom: 20,
   },
   startButton: {
     borderRadius: 30,
