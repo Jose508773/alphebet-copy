@@ -8,6 +8,7 @@ import DepthTransition from '../../components/DepthTransition';
 import PerspectiveNavigation from '../../components/PerspectiveNavigation';
 import CardStackShuffle from '../../components/CardStackShuffle';
 import EnhancedGradientBackground from '../../components/EnhancedGradientBackground';
+import { ComplementaryColorPalette, DynamicColorProvider } from '../../components/ComplementaryColorSystem';
 import { useAccessibility } from '../../constants/AccessibilityContext';
 
 import { Collapsible } from '@/components/Collapsible';
@@ -26,6 +27,9 @@ export default function TabTwoScreen() {
   const [showEnhancedGradient, setShowEnhancedGradient] = useState(false);
   const [gradientIntensity, setGradientIntensity] = useState<'subtle' | 'medium' | 'vibrant'>('medium');
   const [gradientType, setGradientType] = useState<'radial' | 'linear' | 'diagonal' | 'spiral'>('radial');
+  const [showComplementaryColors, setShowComplementaryColors] = useState(false);
+  const [baseColor, setBaseColor] = useState('#FF69B4');
+  const [colorScheme, setColorScheme] = useState<'complementary' | 'triadic' | 'analogous' | 'split-complementary' | 'monochromatic'>('complementary');
 
   const handleDepthTransitionComplete = () => {
     setShowDepthTransition(false);
@@ -250,6 +254,91 @@ export default function TabTwoScreen() {
             • Dynamic transformations{'\n'}
             • Customizable intensity{'\n'}
             • Multiple pattern types
+          </ThemedText>
+        </ThemedView>
+
+        {/* Complementary Color System Demo */}
+        <ThemedView style={styles.colorDemoContainer}>
+          <ThemedText type="title" style={styles.demoTitle}>🎨 Complementary Color Theory</ThemedText>
+          <ThemedText style={styles.demoDescription}>
+            Experience scientifically harmonious color combinations!
+          </ThemedText>
+          
+          <View style={styles.colorControlsContainer}>
+            <View style={styles.controlRow}>
+              <Text style={styles.controlLabel}>Base Color:</Text>
+              <View style={styles.controlButtons}>
+                {[
+                  { color: '#FF69B4', name: 'Hot Pink' },
+                  { color: '#48D1CC', name: 'Turquoise' },
+                  { color: '#FFD700', name: 'Gold' },
+                  { color: '#8B5CF6', name: 'Purple' },
+                  { color: '#34C759', name: 'Green' },
+                ].map(({ color, name }) => (
+                  <Pressable
+                    key={color}
+                    style={[
+                      styles.colorButton,
+                      { backgroundColor: color },
+                      baseColor === color && styles.colorButtonActive,
+                    ]}
+                    onPress={() => setBaseColor(color)}
+                  >
+                    <Text style={styles.colorButtonText}>{name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+            
+            <View style={styles.controlRow}>
+              <Text style={styles.controlLabel}>Color Harmony:</Text>
+              <View style={styles.controlButtons}>
+                {([
+                  { scheme: 'complementary', name: 'Complementary' },
+                  { scheme: 'triadic', name: 'Triadic' },
+                  { scheme: 'analogous', name: 'Analogous' },
+                  { scheme: 'split-complementary', name: 'Split-Comp' },
+                  { scheme: 'monochromatic', name: 'Monochromatic' },
+                ] as const).map(({ scheme, name }) => (
+                  <Pressable
+                    key={scheme}
+                    style={[
+                      styles.controlButton,
+                      colorScheme === scheme && styles.controlButtonActive,
+                    ]}
+                    onPress={() => setColorScheme(scheme)}
+                  >
+                    <Text style={styles.controlButtonText}>{name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+          
+          <Pressable
+            style={styles.colorToggleButton}
+            onPress={() => setShowComplementaryColors(!showComplementaryColors)}
+          >
+            <Text style={styles.colorToggleText}>
+              {showComplementaryColors ? '🚫 Hide Palette' : '🎨 Show Palette'}
+            </Text>
+          </Pressable>
+          
+          {showComplementaryColors && (
+            <View style={styles.paletteDisplayContainer}>
+              <ComplementaryColorPalette
+                baseColor={baseColor}
+                scheme={colorScheme}
+                animationDuration={2500}
+              />
+            </View>
+          )}
+          
+          <ThemedText style={styles.demoInfo}>
+            • Color theory algorithms{'\n'}
+            • Harmonious combinations{'\n'}
+            • Dynamic color palettes{'\n'}
+            • Animated transitions
           </ThemedText>
         </ThemedView>
 
@@ -571,5 +660,62 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  colorDemoContainer: {
+    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  colorControlsContainer: {
+    marginBottom: 20,
+  },
+  colorButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 15,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    minWidth: 70,
+    alignItems: 'center',
+  },
+  colorButtonActive: {
+    borderColor: COLORS.black,
+    borderWidth: 3,
+  },
+  colorButtonText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: COLORS.white,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  colorToggleButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  colorToggleText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  paletteDisplayContainer: {
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 10,
   },
 });

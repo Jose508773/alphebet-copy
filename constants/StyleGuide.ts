@@ -1,6 +1,8 @@
 // StyleGuide.ts
 // Centralized style guide for the Alphabet Learning App
 
+import { ColorTheory } from '../components/ComplementaryColorSystem';
+
 export const COLORS = {
   // Primary colors - vibrant and playful
   primary: '#FF69B4', // Hot pink
@@ -55,6 +57,64 @@ export const RAINBOW = [
   '#FFB3C1', // Pink
   '#FFD700', // Yellow
 ];
+
+// Harmonious color palettes using color theory
+export const COLOR_PALETTES = {
+  // Complementary pairs for high contrast and visual appeal
+  complementary: {
+    hotPink: ColorTheory.generateHarmoniousPalette('#FF69B4', 'complementary'),
+    turquoise: ColorTheory.generateHarmoniousPalette('#48D1CC', 'complementary'),
+    gold: ColorTheory.generateHarmoniousPalette('#FFD700', 'complementary'),
+    coral: ColorTheory.generateHarmoniousPalette('#FF6B6B', 'complementary'),
+    purple: ColorTheory.generateHarmoniousPalette('#8B5CF6', 'complementary'),
+  },
+  
+  // Triadic harmonies for balanced color schemes
+  triadic: {
+    primary: ColorTheory.generateHarmoniousPalette('#FF69B4', 'triadic'),
+    secondary: ColorTheory.generateHarmoniousPalette('#48D1CC', 'triadic'),
+    accent: ColorTheory.generateHarmoniousPalette('#FFD700', 'triadic'),
+  },
+  
+  // Analogous colors for smooth transitions
+  analogous: {
+    warm: ColorTheory.generateHarmoniousPalette('#FF69B4', 'analogous'),
+    cool: ColorTheory.generateHarmoniousPalette('#48D1CC', 'analogous'),
+    energetic: ColorTheory.generateHarmoniousPalette('#FFD700', 'analogous'),
+  },
+  
+  // Split-complementary for softer contrast
+  splitComplementary: {
+    main: ColorTheory.generateHarmoniousPalette('#FF69B4', 'split-complementary'),
+    supporting: ColorTheory.generateHarmoniousPalette('#48D1CC', 'split-complementary'),
+  },
+  
+  // Monochromatic for elegant simplicity
+  monochromatic: {
+    pink: ColorTheory.generateHarmoniousPalette('#FF69B4', 'monochromatic'),
+    blue: ColorTheory.generateHarmoniousPalette('#48D1CC', 'monochromatic'),
+    gold: ColorTheory.generateHarmoniousPalette('#FFD700', 'monochromatic'),
+    purple: ColorTheory.generateHarmoniousPalette('#8B5CF6', 'monochromatic'),
+    green: ColorTheory.generateHarmoniousPalette('#34C759', 'monochromatic'),
+  },
+};
+
+// Helper functions for using harmonious colors
+export const getHarmoniousColors = (baseColor: string, scheme: 'complementary' | 'triadic' | 'analogous' | 'split-complementary' | 'monochromatic') => {
+  return ColorTheory.generateHarmoniousPalette(baseColor, scheme);
+};
+
+export const getComplementaryColor = (hex: string) => {
+  return ColorTheory.getComplementary(hex);
+};
+
+export const getAnalogousColors = (hex: string) => {
+  return ColorTheory.getAnalogous(hex);
+};
+
+export const getTriadicColors = (hex: string) => {
+  return ColorTheory.getTriadic(hex);
+};
 
 export const FONTS = {
   heading: 'Baloo, Nunito, Comic Neue, Arial Rounded MT Bold, sans-serif',
