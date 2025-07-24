@@ -7,6 +7,7 @@ import { ThemedView } from '../../components/ThemedView';
 import DepthTransition from '../../components/DepthTransition';
 import PerspectiveNavigation from '../../components/PerspectiveNavigation';
 import CardStackShuffle from '../../components/CardStackShuffle';
+import EnhancedGradientBackground from '../../components/EnhancedGradientBackground';
 import { useAccessibility } from '../../constants/AccessibilityContext';
 
 import { Collapsible } from '@/components/Collapsible';
@@ -22,6 +23,9 @@ export default function TabTwoScreen() {
   const [perspectiveType, setPerspectiveType] = useState<'zoom' | 'rotate' | 'flip' | 'cube'>('zoom');
   const [showCardShuffle, setShowCardShuffle] = useState(false);
   const [shuffleType, setShuffleType] = useState<'riffle' | 'overhand' | 'fan' | 'cascade'>('riffle');
+  const [showEnhancedGradient, setShowEnhancedGradient] = useState(false);
+  const [gradientIntensity, setGradientIntensity] = useState<'subtle' | 'medium' | 'vibrant'>('medium');
+  const [gradientType, setGradientType] = useState<'radial' | 'linear' | 'diagonal' | 'spiral'>('radial');
 
   const handleDepthTransitionComplete = () => {
     setShowDepthTransition(false);
@@ -50,11 +54,21 @@ export default function TabTwoScreen() {
     setShowCardShuffle(true);
   };
 
-  return (
-    <>
-      <ParallaxScrollView
-        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-        headerImage={<IconSymbol size={310} color="#808080" name="chevron.left.forwardslash.chevron.right" style={styles.headerImage} />}>
+      return (
+      <>
+        {/* Enhanced Gradient Background */}
+        {showEnhancedGradient && (
+          <EnhancedGradientBackground
+            intensity={gradientIntensity}
+            type={gradientType}
+            speed="medium"
+            style={{ zIndex: -1 }}
+          />
+        )}
+        
+        <ParallaxScrollView
+          headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+          headerImage={<IconSymbol size={310} color="#808080" name="chevron.left.forwardslash.chevron.right" style={styles.headerImage} />}>
         
         {/* Depth Transition Demo Section */}
         <ThemedView style={styles.depthDemoContainer}>
@@ -174,6 +188,68 @@ export default function TabTwoScreen() {
             • Multiple shuffle techniques{'\n'}
             • 3D depth and rotation{'\n'}
             • Staggered timing effects
+          </ThemedText>
+        </ThemedView>
+
+        {/* Enhanced Gradient Demo Section */}
+        <ThemedView style={styles.gradientDemoContainer}>
+          <ThemedText type="title" style={styles.demoTitle}>🌈 Enhanced Gradient Demo</ThemedText>
+          <ThemedText style={styles.demoDescription}>
+            Experience multi-layered animated gradients with different patterns!
+          </ThemedText>
+          
+          <View style={styles.gradientControlsContainer}>
+            <View style={styles.controlRow}>
+              <Text style={styles.controlLabel}>Intensity:</Text>
+              <View style={styles.controlButtons}>
+                {(['subtle', 'medium', 'vibrant'] as const).map((intensity) => (
+                  <Pressable
+                    key={intensity}
+                    style={[
+                      styles.controlButton,
+                      gradientIntensity === intensity && styles.controlButtonActive,
+                    ]}
+                    onPress={() => setGradientIntensity(intensity)}
+                  >
+                    <Text style={styles.controlButtonText}>{intensity}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+            
+            <View style={styles.controlRow}>
+              <Text style={styles.controlLabel}>Type:</Text>
+              <View style={styles.controlButtons}>
+                {(['radial', 'spiral', 'diagonal', 'linear'] as const).map((type) => (
+                  <Pressable
+                    key={type}
+                    style={[
+                      styles.controlButton,
+                      gradientType === type && styles.controlButtonActive,
+                    ]}
+                    onPress={() => setGradientType(type)}
+                  >
+                    <Text style={styles.controlButtonText}>{type}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+          
+          <Pressable
+            style={styles.gradientToggleButton}
+            onPress={() => setShowEnhancedGradient(!showEnhancedGradient)}
+          >
+            <Text style={styles.gradientToggleText}>
+              {showEnhancedGradient ? '🚫 Hide Gradient' : '✨ Show Gradient'}
+            </Text>
+          </Pressable>
+          
+          <ThemedText style={styles.demoInfo}>
+            • Multi-layer color cycling{'\n'}
+            • Dynamic transformations{'\n'}
+            • Customizable intensity{'\n'}
+            • Multiple pattern types
           </ThemedText>
         </ThemedView>
 
@@ -435,6 +511,65 @@ const styles = StyleSheet.create({
   shuffleButtonText: {
     color: COLORS.white,
     fontSize: 12,
+    fontWeight: 'bold',
+  },
+  gradientDemoContainer: {
+    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  gradientControlsContainer: {
+    marginBottom: 20,
+  },
+  controlRow: {
+    marginBottom: 15,
+  },
+  controlLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.primaryText,
+    marginBottom: 8,
+  },
+  controlButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  controlButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    backgroundColor: COLORS.pastelMint,
+    borderWidth: 1,
+    borderColor: COLORS.brightGreen,
+  },
+  controlButtonActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  controlButtonText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.primaryText,
+  },
+  gradientToggleButton: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  gradientToggleText: {
+    color: COLORS.white,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });
