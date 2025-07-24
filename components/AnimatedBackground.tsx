@@ -18,6 +18,7 @@ interface FloatingLetter {
 
 export default function AnimatedBackground() {
   const floatingLetters = useRef<FloatingLetter[]>([]);
+  const gradientColorAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Create floating letters
@@ -33,6 +34,15 @@ export default function AnimatedBackground() {
       speed: 0.3 + Math.random() * 0.7,
       rotateValue: new Animated.Value(0),
     }));
+
+    // Start gradient color animation
+    Animated.loop(
+      Animated.timing(gradientColorAnim, {
+        toValue: 1,
+        duration: 20000, // 20 seconds for full color cycle
+        useNativeDriver: false, // Can't use native driver for color interpolation
+      })
+    ).start();
 
     // Start animations
     floatingLetters.current.forEach((letter, index) => {
@@ -73,10 +83,55 @@ export default function AnimatedBackground() {
     };
   }, []);
 
+  // Function to get animated gradient colors
+  const getAnimatedBackgroundColor = () => {
+    return gradientColorAnim.interpolate({
+      inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      outputRange: [
+        '#E8F5E8', // Pastel mint (original)
+        '#E6E6FA', // Lavender
+        '#FFE4E1', // Misty rose
+        '#F0E6FF', // Light purple
+        '#E0F6FF', // Alice blue
+        '#E8F5E8', // Back to pastel mint
+      ],
+    });
+  };
+
+  const getAnimatedGradientOverlay = () => {
+    return gradientColorAnim.interpolate({
+      inputRange: [0, 0.25, 0.5, 0.75, 1],
+      outputRange: [
+        'rgba(255, 255, 255, 0.1)',
+        'rgba(255, 192, 203, 0.1)', // Light pink
+        'rgba(173, 216, 230, 0.1)', // Light blue
+        'rgba(221, 160, 221, 0.1)', // Plum
+        'rgba(255, 255, 255, 0.1)', // Back to white
+      ],
+    });
+  };
+
   return (
     <View style={styles.container}>
-      {/* Gradient Background */}
-      <View style={styles.gradientBackground} />
+      {/* Animated Gradient Background */}
+      <Animated.View 
+        style={[
+          styles.gradientBackground,
+          {
+            backgroundColor: getAnimatedBackgroundColor(),
+          },
+        ]} 
+      />
+      
+      {/* Animated Gradient Overlay */}
+      <Animated.View 
+        style={[
+          styles.gradientOverlay,
+          {
+            backgroundColor: getAnimatedGradientOverlay(),
+          },
+        ]} 
+      />
       
       {/* Floating Letters */}
       {floatingLetters.current.map((letter) => (
@@ -129,10 +184,15 @@ const styles = StyleSheet.create({
   },
   gradientBackground: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: COLORS.gradientStart,
+    zIndex: 1,
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
   },
   floatingLetter: {
     position: 'absolute',
+    zIndex: 3,
     elevation: 5,
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 4 },
