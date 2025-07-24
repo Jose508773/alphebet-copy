@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, FlatList, Platform, Modal, Switch } from 'react-native';
-import Slider from '@react-native-community/slider';
+import { View, Text, StyleSheet, Pressable, FlatList, Platform } from 'react-native';
 import { Animated } from 'react-native';
 import { router } from 'expo-router';
 import LetterDetailPopup from '../../components/LetterDetailPopup';
@@ -35,7 +34,7 @@ export default function LetterGridScreen() {
     translateY: Animated.Value;
   }>>([]);
   const { captions, setCaptions, highContrast, setHighContrast, volume, setVolume } = useAccessibility();
-  const [settingsVisible, setSettingsVisible] = useState(false);
+
   const [isHovered, setIsHovered] = useState(false);
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const [showBookTransition, setShowBookTransition] = useState(false);
@@ -686,43 +685,7 @@ export default function LetterGridScreen() {
       <Pressable style={styles.storySongButton} onPress={handleStartStorySong} accessibilityLabel="Start Story/Song Mode">
         <Text style={styles.storySongButtonText}>Story/Song Mode</Text>
       </Pressable>
-      <Pressable
-        style={styles.accessibilityButton}
-        onPress={() => setSettingsVisible(true)}
-        accessibilityLabel="Accessibility and Settings"
-      >
-        <Text style={styles.accessibilityIcon}>⚙️</Text>
-      </Pressable>
-      <Modal visible={settingsVisible} transparent animationType="fade">
-        <View style={styles.settingsOverlay}>
-          <View style={styles.settingsModal}>
-            <Text style={styles.settingsTitle}>Settings</Text>
-            <View style={styles.settingsRow}>
-              <Text style={styles.settingsLabel}>Captions</Text>
-              <Switch value={captions} onValueChange={setCaptions} />
-            </View>
-            <View style={styles.settingsRow}>
-              <Text style={styles.settingsLabel}>High Contrast</Text>
-              <Switch value={highContrast} onValueChange={setHighContrast} />
-            </View>
-            <View style={styles.settingsRow}>
-              <Text style={styles.settingsLabel}>Volume</Text>
-              <Slider
-                style={{ width: 120 }}
-                minimumValue={0}
-                maximumValue={1}
-                value={volume}
-                onValueChange={setVolume}
-                minimumTrackTintColor="#FF6F61"
-                maximumTrackTintColor="#222"
-              />
-            </View>
-            <Pressable style={styles.closeSettingsButton} onPress={() => setSettingsVisible(false)}>
-              <Text style={styles.closeSettingsText}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+
       
       {/* Book Transition */}
       <BookTransition
@@ -914,57 +877,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-  },
-  accessibilityIcon: {
-    fontSize: 28,
-    color: '#222',
-  },
-  settingsOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  settingsModal: {
-    flex: 1,
-    backgroundColor: COLORS.pastelMint,
-    padding: 20,
-    borderRadius: 20,
-    margin: 20,
-    elevation: 10,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  settingsTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FF6F61',
-    marginBottom: 16,
-  },
-  settingsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 14,
-  },
-  settingsLabel: {
-    fontSize: 18,
-    color: '#222',
-  },
-  closeSettingsButton: {
-    marginTop: 18,
-    backgroundColor: '#FF6F61',
-    borderRadius: 18,
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-  },
-  closeSettingsText: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   header: {
     position: 'absolute',
