@@ -10,6 +10,7 @@ import { useAccessibility } from '../../constants/AccessibilityContext';
 import { COLORS, RAINBOW, FONTS, LETTER_EMOJI } from '../../constants/StyleGuide';
 import AnimatedBackground from '../../components/AnimatedBackground';
 import BookTransition from '../../components/BookTransition';
+import LetterPreview from '../../components/LetterPreview';
 import { speechUtils } from '../../utils/SpeechUtils';
 
 const LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
@@ -38,6 +39,9 @@ export default function LetterGridScreen() {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const [showBookTransition, setShowBookTransition] = useState(false);
   const [pendingLetter, setPendingLetter] = useState<string | null>(null);
+  const [previewLetter, setPreviewLetter] = useState<string | null>(null);
+  const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
+  const [showPreview, setShowPreview] = useState(false);
 
   // Animation refs for each letter's effects
   const wobbleAnims = useRef(
@@ -324,9 +328,17 @@ export default function LetterGridScreen() {
   };
 
   // Enhanced letter press handlers
-  const handleLetterHoverIn = (letter: string) => {
+  const handleLetterHoverIn = (letter: string, event?: any) => {
     setHoveredLetter(letter);
     startHoverEffects(letter);
+    
+    // Show preview with position
+    if (event?.nativeEvent) {
+      const { pageX, pageY } = event.nativeEvent;
+      setPreviewPosition({ x: pageX, y: pageY });
+      setPreviewLetter(letter);
+      setShowPreview(true);
+    }
   };
 
   const handleLetterHoverOut = (letter: string) => {
@@ -334,6 +346,12 @@ export default function LetterGridScreen() {
       setHoveredLetter(null);
     }
     stopHoverEffects(letter);
+    
+    // Hide preview
+    setShowPreview(false);
+    setTimeout(() => {
+      setPreviewLetter(null);
+    }, 150);
   };
 
   // Function to get interpolated rainbow color
@@ -558,7 +576,7 @@ export default function LetterGridScreen() {
               stopColorWave(item);
               stop3DRotation(item);
             }}
-            onHoverIn={() => handleLetterHoverIn(item)}
+            onHoverIn={(event) => handleLetterHoverIn(item, event)}
             onHoverOut={() => handleLetterHoverOut(item)}
           >
           <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
@@ -705,6 +723,13 @@ export default function LetterGridScreen() {
         onPrevious={handlePreviousLetter}
         canGoNext={true}
         canGoPrevious={true}
+      />
+
+      {/* Letter Preview */}
+      <LetterPreview
+        letter={previewLetter}
+        position={previewPosition}
+        isVisible={showPreview}
       />
     </View>
   );
