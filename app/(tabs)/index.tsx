@@ -87,7 +87,10 @@ export default function LetterGridScreen() {
       onPress={() => handleLetterPress(item)}
     >
       <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
-      <Text style={styles.letterText}>{item}</Text>
+      <View style={styles.letterContainer}>
+        <Text style={styles.letterText}>{item}</Text>
+        <Text style={styles.letterTextLowercase}>{item.toLowerCase()}</Text>
+      </View>
     </Pressable>
   );
 
@@ -226,23 +229,40 @@ const styles = StyleSheet.create({
     borderColor: COLORS.highContrastText,
   },
   letterText: {
-    fontSize: 48,
+    fontSize: 36,
     fontWeight: 'bold',
     color: COLORS.white,
     textShadowColor: COLORS.shadow,
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
     backgroundColor: COLORS.pastelLavender,
-    borderRadius: 10,
-    padding: 8,
+    borderRadius: 8,
+    padding: 6,
+    marginBottom: 2,
   },
   letterEmoji: {
-    fontSize: 40,
+    fontSize: 32,
     color: COLORS.brightPurple,
-    marginTop: 12,
+    marginTop: 8,
+    marginBottom: 4,
     textShadowColor: COLORS.shadow,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+  },
+  letterContainer: {
+    alignItems: 'center',
+  },
+  letterTextLowercase: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.white,
+    textShadowColor: COLORS.shadow,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    backgroundColor: COLORS.pastelMint,
+    borderRadius: 6,
+    padding: 4,
+    opacity: 0.9,
   },
   practiceButton: {
     backgroundColor: '#6EC6FF',
