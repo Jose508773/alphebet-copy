@@ -630,13 +630,15 @@ export default function LetterGridScreen() {
               {item.toLowerCase()}
             </Animated.Text>
           </View>
-                      <SoundPreviewButton 
-              letter={item} 
-              size={28}
-              position="top-right"
-              onSoundPlay={handleSoundPreview}
-            />
           </Pressable>
+          
+          {/* Sound Preview Button - positioned outside main Pressable */}
+          <SoundPreviewButton 
+            letter={item} 
+            size={28}
+            position="top-right"
+            onSoundPlay={handleSoundPreview}
+          />
         </Animated.View>
       </Animated.View>
     </Animated.View>

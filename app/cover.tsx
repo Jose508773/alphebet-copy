@@ -3,7 +3,6 @@ import { View, Text, Animated, StyleSheet, Dimensions, Pressable } from 'react-n
 import { router } from 'expo-router';
 import { COLORS, FONTS } from '../constants/StyleGuide';
 import LoadingWheel from '../components/LoadingWheel';
-import BookTransition from '../components/BookTransition';
 import PulsingButton from '../components/PulsingButton';
 import { useAccessibility } from '../constants/AccessibilityContext';
 import AnimatedBackground from '../components/AnimatedBackground';
@@ -16,7 +15,6 @@ const { width, height } = Dimensions.get('window');
 export default function CoverScreen() {
   const { highContrast } = useAccessibility();
   const [isLoading, setIsLoading] = useState(true);
-  const [showBookTransition, setShowBookTransition] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
   const [showSubtitle, setShowSubtitle] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
@@ -68,11 +66,6 @@ export default function CoverScreen() {
   }, []);
 
   const handleStartLearning = () => {
-    setShowBookTransition(true);
-  };
-
-  const handleBookTransitionComplete = () => {
-    setShowBookTransition(false);
     router.replace('/(tabs)');
   };
 
@@ -143,13 +136,7 @@ export default function CoverScreen() {
         </View>
       )}
 
-      {/* Book Transition */}
-      <BookTransition
-        isVisible={showBookTransition}
-        onTransitionComplete={handleBookTransitionComplete}
-        direction="open"
-        duration={1500}
-      />
+
       
       {/* Main Content */}
       <Animated.View 

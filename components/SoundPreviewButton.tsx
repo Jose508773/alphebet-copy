@@ -124,6 +124,7 @@ export default function SoundPreviewButton({
           ],
         },
       ]}
+      pointerEvents="box-none"
     >
       {/* Ripple Effect */}
       <Animated.View
@@ -160,7 +161,10 @@ export default function SoundPreviewButton({
           },
           disabled && styles.disabled,
         ]}
-        onPress={handlePress}
+        onPress={(e) => {
+          e.stopPropagation();
+          handlePress();
+        }}
         disabled={disabled}
         accessibilityLabel={`Play sound for letter ${letter}`}
         accessibilityRole="button"
