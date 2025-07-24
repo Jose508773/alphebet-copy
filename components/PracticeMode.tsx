@@ -85,6 +85,20 @@ export const PracticeMode: React.FC<{ onHome: () => void }> = ({ onHome }) => {
       setScore(prev => prev + 1);
       speechUtils.speakSuccess();
     } else {
+      // Enhanced wrong answer feedback
+      setTimeout(() => {
+        if (Platform.OS === 'web' && typeof window !== 'undefined' && window.speechSynthesis) {
+          // Clear wrong answer announcement
+          window.speechSynthesis.speak(new SpeechSynthesisUtterance("That's incorrect. Try again!"));
+          
+          // After a pause, give the correct answer
+          setTimeout(() => {
+            const correctAnswerText = `The correct answer is ${currentLetter}. ${currentLetter} makes the ${LETTER_DATA[currentLetter]?.phonetic} sound.`;
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(correctAnswerText));
+          }, 1500);
+        }
+      }, 500);
+      
       speechUtils.speakEncouragement();
     }
   };
@@ -169,12 +183,12 @@ export const PracticeMode: React.FC<{ onHome: () => void }> = ({ onHome }) => {
             styles.feedbackText,
             isCorrect ? styles.correctFeedback : styles.wrongFeedback
           ]}>
-            {isCorrect ? '✅ Correct!' : '❌ Wrong!'}
+            {isCorrect ? '✅ Correct! Well done!' : '❌ That\'s incorrect!'}
           </Text>
           <Text style={styles.explanationText}>
             {isCorrect 
               ? `Great job! ${currentLetter} makes the "${LETTER_DATA[currentLetter]?.phonetic}" sound.`
-              : `The correct answer is ${currentLetter}. ${currentLetter} makes the "${LETTER_DATA[currentLetter]?.phonetic}" sound.`
+              : `The correct answer is ${currentLetter}. Remember: ${currentLetter} makes the "${LETTER_DATA[currentLetter]?.phonetic}" sound.`
             }
           </Text>
           <Pressable
@@ -300,6 +314,9 @@ const styles = StyleSheet.create({
   },
   wrongFeedback: {
     color: COLORS.brightRed,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   explanationText: {
     fontSize: 16,
