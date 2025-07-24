@@ -8,6 +8,7 @@ import {
   Animated
 } from 'react-native';
 import { COLORS } from '../constants/StyleGuide';
+import { CelebrationAnimation, SuccessAnimation } from './LottieAnimationSystem';
 import { useAccessibility } from '../constants/AccessibilityContext';
 import { LETTER_EMOJI } from '../constants/StyleGuide';
 import { speechUtils, LETTER_DATA, speechSynthesis } from '../utils/SpeechUtils';
@@ -42,6 +43,7 @@ export const PracticeMode: React.FC<{ onHome: () => void }> = ({ onHome }) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
   const { highContrast } = useAccessibility();
 
   // Initialize or reset the quiz
@@ -83,7 +85,13 @@ export const PracticeMode: React.FC<{ onHome: () => void }> = ({ onHome }) => {
     
     if (correct) {
       setScore(prev => prev + 1);
+      setShowCelebration(true);
       speechUtils.speakSuccess();
+      
+      // Hide celebration after 2 seconds
+      setTimeout(() => {
+        setShowCelebration(false);
+      }, 2000);
     } else {
       // Enhanced wrong answer feedback
       setTimeout(() => {
@@ -122,6 +130,12 @@ export const PracticeMode: React.FC<{ onHome: () => void }> = ({ onHome }) => {
 
   return (
     <View style={styles.container}>
+      {/* Celebration Animation Overlay */}
+      {showCelebration && (
+        <View style={styles.celebrationOverlay}>
+          <CelebrationAnimation size={150} />
+        </View>
+      )}
       <View style={styles.header}>
         <Text style={styles.title}>Quiz Mode</Text>
         <Pressable
@@ -334,5 +348,16 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  celebrationOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+    pointerEvents: 'none',
   },
 });
