@@ -11,6 +11,7 @@ import { COLORS, RAINBOW, FONTS, LETTER_EMOJI } from '../../constants/StyleGuide
 import AnimatedBackground from '../../components/AnimatedBackground';
 import BookTransition from '../../components/BookTransition';
 import LetterPreview from '../../components/LetterPreview';
+import SoundPreviewButton from '../../components/SoundPreviewButton';
 import { speechUtils } from '../../utils/SpeechUtils';
 
 const LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
@@ -42,6 +43,16 @@ export default function LetterGridScreen() {
   const [previewLetter, setPreviewLetter] = useState<string | null>(null);
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
   const [showPreview, setShowPreview] = useState(false);
+  const [playingSoundPreview, setPlayingSoundPreview] = useState<string | null>(null);
+
+  // Sound preview handler
+  const handleSoundPreview = (letter: string) => {
+    setPlayingSoundPreview(letter);
+    // Clear the playing state after a short delay
+    setTimeout(() => {
+      setPlayingSoundPreview(null);
+    }, 1000);
+  };
 
   // Animation refs for each letter's effects
   const wobbleAnims = useRef(
@@ -602,6 +613,12 @@ export default function LetterGridScreen() {
               {item.toLowerCase()}
             </Animated.Text>
           </View>
+                      <SoundPreviewButton 
+              letter={item} 
+              size={28}
+              position="top-right"
+              onSoundPlay={handleSoundPreview}
+            />
           </Pressable>
         </Animated.View>
       </Animated.View>
