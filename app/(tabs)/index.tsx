@@ -22,6 +22,15 @@ export default function LetterGridScreen() {
   const [storySongMode, setStorySongMode] = useState(false);
   const [hoveredLetter, setHoveredLetter] = useState<string | null>(null);
   const [pressedLetter, setPressedLetter] = useState<string | null>(null);
+  const [particles, setParticles] = useState<Array<{
+    id: string;
+    x: number;
+    y: number;
+    opacity: Animated.Value;
+    scale: Animated.Value;
+    translateX: Animated.Value;
+    translateY: Animated.Value;
+  }>>([]);
   const { captions, setCaptions, highContrast, setHighContrast, volume, setVolume } = useAccessibility();
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -48,6 +57,9 @@ export default function LetterGridScreen() {
     setPopupVisible(true);
     // Speak the letter when pressed
     speechUtils.speakLetter(letter);
+    // Create particle burst effect
+    const letterIndex = LETTERS.indexOf(letter);
+    createParticleBurst(letterIndex);
   };
 
   // Wobble animation functions
@@ -124,6 +136,68 @@ export default function LetterGridScreen() {
       duration: 200,
       useNativeDriver: false,
     }).start();
+  };
+
+  // Particle burst animation functions
+  const createParticleBurst = (letterIndex: number) => {
+    const newParticles: Array<{
+      id: string;
+      x: number;
+      y: number;
+      opacity: Animated.Value;
+      scale: Animated.Value;
+      translateX: Animated.Value;
+      translateY: Animated.Value;
+    }> = [];
+    const particleCount = 8;
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * 2 * Math.PI;
+      const distance = 50 + Math.random() * 30;
+      
+      const particle = {
+        id: `${letterIndex}-${i}-${Date.now()}`,
+        x: Math.cos(angle) * distance,
+        y: Math.sin(angle) * distance,
+        opacity: new Animated.Value(1),
+        scale: new Animated.Value(1),
+        translateX: new Animated.Value(0),
+        translateY: new Animated.Value(0),
+      };
+      
+      newParticles.push(particle);
+      
+      // Animate particle
+      Animated.parallel([
+        Animated.timing(particle.translateX, {
+          toValue: particle.x,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(particle.translateY, {
+          toValue: particle.y,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(particle.opacity, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(particle.scale, {
+          toValue: 0.2,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+    
+    setParticles(prev => [...prev, ...newParticles]);
+    
+    // Clean up particles after animation
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => !newParticles.some(np => np.id === p.id)));
+    }, 800);
   };
 
   const handleClosePopup = () => {
@@ -247,6 +321,28 @@ export default function LetterGridScreen() {
       </View>
       {/* Fun confetti background */}
       <View style={styles.confettiBg} pointerEvents="none" />
+      
+      {/* Particle effects container */}
+      <View style={styles.particleContainer} pointerEvents="none">
+        {particles.map((particle) => (
+          <Animated.View
+            key={particle.id}
+            style={[
+              styles.particle,
+              {
+                opacity: particle.opacity,
+                transform: [
+                  { translateX: particle.translateX },
+                  { translateY: particle.translateY },
+                  { scale: particle.scale },
+                ],
+              },
+            ]}
+          >
+            <Text style={styles.particleText}>✨</Text>
+          </Animated.View>
+        ))}
+      </View>
       <Animated.FlatList
         data={LETTERS}
         numColumns={NUM_COLUMNS}
@@ -387,6 +483,23 @@ const styles = StyleSheet.create({
     shadowColor: COLORS.accent,
     shadowOffset: { width: 0, height: 0 },
     elevation: 15,
+  },
+  particleContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  particle: {
+    position: 'absolute',
+  },
+  particleText: {
+    fontSize: 16,
+    color: COLORS.accent,
   },
   letterTextLowercase: {
     fontSize: 20,
