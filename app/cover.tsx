@@ -8,6 +8,7 @@ import PulsingButton from '../components/PulsingButton';
 import { useAccessibility } from '../constants/AccessibilityContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 import StaggeredTextAnimation, { MultiLineStaggeredText, AdvancedStaggeredText } from '../components/StaggeredTextAnimation';
+import FloatingElements, { FloatingLetters, FloatingEmojis, FloatingBubbles } from '../components/FloatingElements';
 
 const { width, height } = Dimensions.get('window');
 
@@ -123,6 +124,11 @@ export default function CoverScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
+      
+      {/* Floating Elements */}
+      <FloatingLetters count={6} speed="slow" />
+      <FloatingEmojis count={4} speed="slow" />
+      <FloatingBubbles count={8} speed="medium" />
       
       {/* Loading Wheel */}
       {isLoading && (
