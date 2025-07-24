@@ -39,7 +39,7 @@ export default function LetterGridScreen() {
   const [showBookTransition, setShowBookTransition] = useState(false);
   const [pendingLetter, setPendingLetter] = useState<string | null>(null);
 
-  // Animation refs for each letter's wobble effect
+  // Animation refs for each letter's effects
   const wobbleAnims = useRef(
     LETTERS.reduce((acc, letter) => {
       acc[letter] = new Animated.Value(0);
@@ -47,7 +47,6 @@ export default function LetterGridScreen() {
     }, {} as { [key: string]: Animated.Value })
   ).current;
 
-  // Animation refs for each letter's glow effect
   const glowAnims = useRef(
     LETTERS.reduce((acc, letter) => {
       acc[letter] = new Animated.Value(0);
@@ -55,8 +54,21 @@ export default function LetterGridScreen() {
     }, {} as { [key: string]: Animated.Value })
   ).current;
 
-  // Animation refs for each letter's color wave effect
   const colorWaveAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
+
+  const rotationXAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
+
+  const rotationYAnims = useRef(
     LETTERS.reduce((acc, letter) => {
       acc[letter] = new Animated.Value(0);
       return acc;
@@ -174,11 +186,71 @@ export default function LetterGridScreen() {
 
   const stopColorWave = (letter: string) => {
     colorWaveAnims[letter].stopAnimation();
-    Animated.timing(colorWaveAnims[letter], {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
+    colorWaveAnims[letter].setValue(0);
+  };
+
+  // 3D Rotation animation functions
+  const start3DRotation = (letter: string) => {
+    // X-axis rotation (tilt forward/backward)
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(rotationXAnims[letter], {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotationXAnims[letter], {
+          toValue: -1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotationXAnims[letter], {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Y-axis rotation (turn left/right)
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(rotationYAnims[letter], {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotationYAnims[letter], {
+          toValue: -1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotationYAnims[letter], {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  const stop3DRotation = (letter: string) => {
+    rotationXAnims[letter].stopAnimation();
+    rotationYAnims[letter].stopAnimation();
+    
+    // Return to original position
+    Animated.parallel([
+      Animated.timing(rotationXAnims[letter], {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(rotationYAnims[letter], {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   // Function to get interpolated rainbow color
@@ -319,6 +391,19 @@ export default function LetterGridScreen() {
     <Animated.View
       style={{
         transform: [
+          { perspective: 1000 },
+          {
+            rotateX: rotationXAnims[item].interpolate({
+              inputRange: [-1, 1],
+              outputRange: ['-15deg', '15deg'],
+            }),
+          },
+          {
+            rotateY: rotationYAnims[item].interpolate({
+              inputRange: [-1, 1],
+              outputRange: ['-20deg', '20deg'],
+            }),
+          },
           {
             rotate: wobbleAnims[item].interpolate({
               inputRange: [-1, 1],
@@ -356,10 +441,16 @@ export default function LetterGridScreen() {
           onPressIn={() => {
             handlePressIn(item);
             startWobble(item);
+            startGlow(item);
+            startColorWave(item);
+            start3DRotation(item);
           }}
           onPressOut={() => {
             handlePressOut(item);
             stopWobble(item);
+            stopGlow(item);
+            stopColorWave(item);
+            stop3DRotation(item);
           }}
         >
           <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
