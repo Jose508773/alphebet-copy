@@ -8,7 +8,7 @@ import { StorySongMode } from '../../components/StorySongMode';
 import { useAccessibility } from '../../constants/AccessibilityContext';
 import { COLORS, RAINBOW, FONTS, LETTER_EMOJI } from '../../constants/StyleGuide';
 import AnimatedBackground from '../../components/AnimatedBackground';
-import BookTransition from '../../components/BookTransition';
+
 import LetterPreview from '../../components/LetterPreview';
 import SoundPreviewButton from '../../components/SoundPreviewButton';
 import { speechUtils } from '../../utils/SpeechUtils';
@@ -37,8 +37,7 @@ export default function LetterGridScreen() {
 
   const [isHovered, setIsHovered] = useState(false);
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const [showBookTransition, setShowBookTransition] = useState(false);
-  const [pendingLetter, setPendingLetter] = useState<string | null>(null);
+
   const [previewLetter, setPreviewLetter] = useState<string | null>(null);
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
   const [showPreview, setShowPreview] = useState(false);
@@ -111,9 +110,8 @@ export default function LetterGridScreen() {
   ).current;
 
   const handleLetterPress = (letter: string) => {
-    // Trigger book transition first
-    setPendingLetter(letter);
-    setShowBookTransition(true);
+    setSelectedLetter(letter);
+    setPopupVisible(true);
     
     // Speak the letter when pressed
     speechUtils.speakLetter(letter);
@@ -122,12 +120,7 @@ export default function LetterGridScreen() {
     createParticleBurst(letterIndex);
   };
 
-  const handleBookTransitionComplete = () => {
-    setShowBookTransition(false);
-    setSelectedLetter(pendingLetter);
-    setPopupVisible(true);
-    setPendingLetter(null);
-  };
+
 
   // Wobble animation functions
   const startWobble = (letter: string) => {
@@ -686,14 +679,7 @@ export default function LetterGridScreen() {
         <Text style={styles.storySongButtonText}>Story/Song Mode</Text>
       </Pressable>
 
-      
-      {/* Book Transition */}
-      <BookTransition
-        isVisible={showBookTransition}
-        onTransitionComplete={handleBookTransitionComplete}
-        direction="open"
-        duration={1200}
-      />
+
 
       <LetterDetailPopup
         visible={popupVisible}
