@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { COLORS, FONTS } from '../constants/StyleGuide';
 import LoadingWheel from '../components/LoadingWheel';
 import BookTransition from '../components/BookTransition';
+import PulsingButton from '../components/PulsingButton';
 import { useAccessibility } from '../constants/AccessibilityContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 
@@ -190,29 +191,24 @@ export default function CoverScreen() {
         </View>
 
         <View style={styles.buttonSection}>
-          <Animated.View
-            style={{
-              transform: [{ scale: buttonPulseAnim }],
-            }}
+          <PulsingButton
+            onPress={handleStartLearning}
+            style={[
+              styles.startButton,
+              ...(highContrast ? [styles.startButtonHighContrast] : []),
+            ]}
+            pulseColor={COLORS.accent}
+            pulseIntensity={0.4}
+            pulseDuration={1800}
+            accessibilityLabel="Start learning the alphabet"
           >
-            <Pressable
-              style={({ pressed }) => [
-                styles.startButton,
-                pressed && styles.startButtonPressed,
-                highContrast && styles.startButtonHighContrast,
-              ]}
-              onPress={handleStartLearning}
-              accessibilityRole="button"
-              accessibilityLabel="Start learning the alphabet"
-            >
-              <Text style={[
-                styles.startButtonText,
-                highContrast && styles.startButtonTextHighContrast
-              ]}>
-                🚀 Start Learning!
-              </Text>
-            </Pressable>
-          </Animated.View>
+            <Text style={[
+              styles.startButtonText,
+              highContrast && styles.startButtonTextHighContrast
+            ]}>
+              🚀 Start Learning!
+            </Text>
+          </PulsingButton>
         </View>
       </Animated.View>
     </View>
