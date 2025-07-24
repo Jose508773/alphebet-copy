@@ -31,6 +31,7 @@ export default function AnimatedBackground() {
   const floatingLetters = useRef<FloatingLetter[]>([]);
   const snowLetters = useRef<SnowLetter[]>([]);
   const gradientColorAnim = useRef(new Animated.Value(0)).current;
+  const breathingAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Create floating letters
@@ -54,6 +55,22 @@ export default function AnimatedBackground() {
         duration: 20000, // 20 seconds for full color cycle
         useNativeDriver: false, // Can't use native driver for color interpolation
       })
+    ).start();
+
+    // Start breathing animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(breathingAnim, {
+          toValue: 1,
+          duration: 3000, // 3 seconds to breathe in
+          useNativeDriver: false,
+        }),
+        Animated.timing(breathingAnim, {
+          toValue: 0,
+          duration: 3000, // 3 seconds to breathe out
+          useNativeDriver: false,
+        }),
+      ])
     ).start();
 
     // Create snow letters
@@ -168,8 +185,37 @@ export default function AnimatedBackground() {
     });
   };
 
+  const getBreathingGradientOverlay = () => {
+    return breathingAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.15)'], // Breathing overlay
+    });
+  };
+
+  const getBreathingScale = () => {
+    return breathingAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 1.02], // Very subtle scale change
+    });
+  };
+
+  const getBreathingOpacity = () => {
+    return breathingAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.95, 1], // Very subtle opacity change
+    });
+  };
+
   return (
-    <View style={styles.container}>
+    <Animated.View 
+      style={[
+        styles.container,
+        {
+          transform: [{ scale: getBreathingScale() }],
+          opacity: getBreathingOpacity(),
+        },
+      ]}
+    >
       {/* Animated Gradient Background */}
       <Animated.View 
         style={[
@@ -186,6 +232,16 @@ export default function AnimatedBackground() {
           styles.gradientOverlay,
           {
             backgroundColor: getAnimatedGradientOverlay(),
+          },
+        ]} 
+      />
+      
+      {/* Breathing Overlay */}
+      <Animated.View 
+        style={[
+          styles.breathingOverlay,
+          {
+            backgroundColor: getBreathingGradientOverlay(),
           },
         ]} 
       />
@@ -261,7 +317,7 @@ export default function AnimatedBackground() {
           </Text>
         </Animated.View>
       ))}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -282,6 +338,10 @@ const styles = StyleSheet.create({
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 2,
+  },
+  breathingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2.5,
   },
   floatingLetter: {
     position: 'absolute',
