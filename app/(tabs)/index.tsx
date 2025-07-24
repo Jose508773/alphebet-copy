@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, Platform } from 'react-native';
 import { Animated } from 'react-native';
 import { router } from 'expo-router';
@@ -42,6 +42,29 @@ export default function LetterGridScreen() {
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 });
   const [showPreview, setShowPreview] = useState(false);
   const [playingSoundPreview, setPlayingSoundPreview] = useState<string | null>(null);
+  
+  // Animated gradient background
+  const gradientAnim = useRef(new Animated.Value(0)).current;
+  
+  // Beautiful gradient color schemes
+  const gradientSchemes = {
+    sunset: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe'],
+    ocean: ['#667eea', '#764ba2', '#4facfe', '#00f2fe', '#4facfe'],
+    forest: ['#11998e', '#38ef7d', '#56ab2f', '#a8e6cf', '#11998e'],
+    warm: ['#ff9a9e', '#fecfef', '#fecfef', '#ffc3a0', '#ff9a9e'],
+    cool: ['#a8edea', '#fed6e3', '#667eea', '#764ba2', '#a8edea'],
+  };
+  
+  // Start gradient animation
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(gradientAnim, {
+        toValue: 1,
+        duration: 15000,
+        useNativeDriver: false,
+      })
+    ).start();
+  }, []);
 
   // Sound preview handler
   const handleSoundPreview = (letter: string) => {
@@ -626,6 +649,18 @@ export default function LetterGridScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Beautiful animated gradient background */}
+      <Animated.View
+        style={[
+          styles.animatedBackground,
+          {
+            backgroundColor: gradientAnim.interpolate({
+              inputRange: [0, 0.25, 0.5, 0.75, 1],
+              outputRange: gradientSchemes.sunset, // Change to: ocean, forest, warm, or cool
+            }),
+          },
+        ]}
+      />
       <AnimatedBackground />
       {/* Header with back button */}
       <View style={styles.header}>
@@ -704,11 +739,15 @@ export default function LetterGridScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.gradientStart,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 24,
     overflow: 'hidden',
+    backgroundColor: '#667eea', // Fallback color
+  },
+  animatedBackground: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: -1,
   },
   confettiBg: {
     ...StyleSheet.absoluteFillObject,
