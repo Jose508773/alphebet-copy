@@ -16,8 +16,20 @@ interface FloatingLetter {
   rotateValue: Animated.Value;
 }
 
+interface SnowLetter {
+  id: number;
+  letter: string;
+  animValue: Animated.Value;
+  x: number;
+  size: number;
+  opacity: number;
+  fallSpeed: number;
+  rotateValue: Animated.Value;
+}
+
 export default function AnimatedBackground() {
   const floatingLetters = useRef<FloatingLetter[]>([]);
+  const snowLetters = useRef<SnowLetter[]>([]);
   const gradientColorAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -43,6 +55,18 @@ export default function AnimatedBackground() {
         useNativeDriver: false, // Can't use native driver for color interpolation
       })
     ).start();
+
+    // Create snow letters
+    snowLetters.current = Array.from({ length: 12 }, (_, i) => ({
+      id: i + 100, // Different ID range from floating letters
+      letter: letters[Math.floor(Math.random() * letters.length)],
+      animValue: new Animated.Value(-50 - Math.random() * 100),
+      x: Math.random() * width,
+      size: 14 + Math.random() * 20,
+      opacity: 0.15 + Math.random() * 0.25,
+      fallSpeed: 0.8 + Math.random() * 0.4,
+      rotateValue: new Animated.Value(0),
+    }));
 
     // Start animations
     floatingLetters.current.forEach((letter, index) => {
@@ -76,9 +100,42 @@ export default function AnimatedBackground() {
       });
     });
 
+    // Start snow letter animations
+    snowLetters.current.forEach((snowLetter, index) => {
+      // Gentle falling animation
+      Animated.loop(
+        Animated.timing(snowLetter.animValue, {
+          toValue: height + 100,
+          duration: (12000 + Math.random() * 8000) / snowLetter.fallSpeed,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      // Gentle rotation
+      Animated.loop(
+        Animated.timing(snowLetter.rotateValue, {
+          toValue: 1,
+          duration: 8000 + Math.random() * 12000,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      // Reset position when off screen (bottom)
+      const snowListener = snowLetter.animValue.addListener(({ value }) => {
+        if (value >= height + 100) {
+          snowLetter.animValue.setValue(-50 - Math.random() * 100);
+          snowLetter.x = Math.random() * width;
+          snowLetter.letter = letters[Math.floor(Math.random() * letters.length)];
+        }
+      });
+    });
+
     return () => {
       floatingLetters.current.forEach(letter => {
         letter.animValue.removeAllListeners();
+      });
+      snowLetters.current.forEach(snowLetter => {
+        snowLetter.animValue.removeAllListeners();
       });
     };
   }, []);
@@ -168,6 +225,42 @@ export default function AnimatedBackground() {
           </Text>
         </Animated.View>
       ))}
+
+      {/* Snow Letters */}
+      {snowLetters.current.map((snowLetter) => (
+        <Animated.View
+          key={snowLetter.id}
+          style={[
+            styles.snowLetter,
+            {
+              left: snowLetter.x,
+              transform: [
+                {
+                  translateY: snowLetter.animValue,
+                },
+                {
+                  rotate: snowLetter.rotateValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '45deg'],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.snowLetterText,
+              {
+                fontSize: snowLetter.size,
+                opacity: snowLetter.opacity,
+              },
+            ]}
+          >
+            {snowLetter.letter}
+          </Text>
+        </Animated.View>
+      ))}
     </View>
   );
 }
@@ -205,5 +298,16 @@ const styles = StyleSheet.create({
     textShadowColor: COLORS.shadow,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+  },
+  snowLetter: {
+    position: 'absolute',
+    zIndex: 4,
+  },
+  snowLetterText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    textShadowColor: COLORS.shadow,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
 });
