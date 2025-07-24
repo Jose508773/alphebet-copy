@@ -6,6 +6,7 @@ import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
 import DepthTransition from '../../components/DepthTransition';
 import PerspectiveNavigation from '../../components/PerspectiveNavigation';
+import CardStackShuffle from '../../components/CardStackShuffle';
 import { useAccessibility } from '../../constants/AccessibilityContext';
 
 import { Collapsible } from '@/components/Collapsible';
@@ -19,6 +20,8 @@ export default function TabTwoScreen() {
   const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
   const [showPerspectiveNav, setShowPerspectiveNav] = useState(false);
   const [perspectiveType, setPerspectiveType] = useState<'zoom' | 'rotate' | 'flip' | 'cube'>('zoom');
+  const [showCardShuffle, setShowCardShuffle] = useState(false);
+  const [shuffleType, setShuffleType] = useState<'riffle' | 'overhand' | 'fan' | 'cascade'>('riffle');
 
   const handleDepthTransitionComplete = () => {
     setShowDepthTransition(false);
@@ -26,6 +29,10 @@ export default function TabTwoScreen() {
 
   const handlePerspectiveNavComplete = () => {
     setShowPerspectiveNav(false);
+  };
+
+  const handleCardShuffleComplete = () => {
+    setShowCardShuffle(false);
   };
 
   const triggerDepthTransition = (direction: 'forward' | 'backward') => {
@@ -36,6 +43,11 @@ export default function TabTwoScreen() {
   const triggerPerspectiveNav = (type: 'zoom' | 'rotate' | 'flip' | 'cube') => {
     setPerspectiveType(type);
     setShowPerspectiveNav(true);
+  };
+
+  const triggerCardShuffle = (type: 'riffle' | 'overhand' | 'fan' | 'cascade') => {
+    setShuffleType(type);
+    setShowCardShuffle(true);
   };
 
   return (
@@ -117,6 +129,51 @@ export default function TabTwoScreen() {
             • Multiple animation types{'\n'}
             • Dramatic visual effects{'\n'}
             • Smooth transition sequences
+          </ThemedText>
+        </ThemedView>
+
+        {/* Card Stack Shuffle Demo Section */}
+        <ThemedView style={styles.shuffleDemoContainer}>
+          <ThemedText type="title" style={styles.demoTitle}>🃏 Card Stack Shuffle Demo</ThemedText>
+          <ThemedText style={styles.demoDescription}>
+            Professional card shuffling animations with realistic physics!
+          </ThemedText>
+          
+          <View style={styles.shuffleButtonContainer}>
+            <Pressable
+              style={[styles.shuffleButton, styles.riffleButton]}
+              onPress={() => triggerCardShuffle('riffle')}
+            >
+              <Text style={styles.shuffleButtonText}>🔄 Riffle</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.shuffleButton, styles.overhandButton]}
+              onPress={() => triggerCardShuffle('overhand')}
+            >
+              <Text style={styles.shuffleButtonText}>🖐️ Overhand</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.shuffleButton, styles.fanButton]}
+              onPress={() => triggerCardShuffle('fan')}
+            >
+              <Text style={styles.shuffleButtonText}>🌊 Fan</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.shuffleButton, styles.cascadeButton]}
+              onPress={() => triggerCardShuffle('cascade')}
+            >
+              <Text style={styles.shuffleButtonText}>🌪️ Cascade</Text>
+            </Pressable>
+          </View>
+          
+          <ThemedText style={styles.demoInfo}>
+            • Realistic card physics{'\n'}
+            • Multiple shuffle techniques{'\n'}
+            • 3D depth and rotation{'\n'}
+            • Staggered timing effects
           </ThemedText>
         </ThemedView>
 
@@ -208,6 +265,15 @@ export default function TabTwoScreen() {
         onTransitionComplete={handlePerspectiveNavComplete}
         perspectiveType={perspectiveType}
         duration={1800}
+      />
+
+      {/* Card Stack Shuffle */}
+      <CardStackShuffle
+        isVisible={showCardShuffle}
+        onShuffleComplete={handleCardShuffleComplete}
+        shuffleType={shuffleType}
+        cardCount={10}
+        duration={3500}
       />
     </>
   );
@@ -320,6 +386,53 @@ const styles = StyleSheet.create({
     borderColor: COLORS.brightYellow,
   },
   perspectiveButtonText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  shuffleDemoContainer: {
+    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  shuffleButtonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  shuffleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 6,
+    marginHorizontal: 5,
+    marginVertical: 5,
+    borderWidth: 1,
+  },
+  riffleButton: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  overhandButton: {
+    backgroundColor: COLORS.secondary,
+    borderColor: COLORS.secondary,
+  },
+  fanButton: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  cascadeButton: {
+    backgroundColor: COLORS.brightRed,
+    borderColor: COLORS.brightRed,
+  },
+  shuffleButtonText: {
     color: COLORS.white,
     fontSize: 12,
     fontWeight: 'bold',
