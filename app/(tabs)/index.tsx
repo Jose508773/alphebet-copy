@@ -52,6 +52,14 @@ export default function LetterGridScreen() {
     }, {} as { [key: string]: Animated.Value })
   ).current;
 
+  // Animation refs for each letter's color wave effect
+  const colorWaveAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
+
   const handleLetterPress = (letter: string) => {
     setSelectedLetter(letter);
     setPopupVisible(true);
@@ -104,11 +112,13 @@ export default function LetterGridScreen() {
   const handlePressIn = (letter: string) => {
     setPressedLetter(letter);
     startGlow(letter);
+    startColorWave(letter);
   };
 
   const handlePressOut = (letter: string) => {
     setPressedLetter(null);
     stopGlow(letter);
+    stopColorWave(letter);
   };
 
   // Glow animation functions
@@ -136,6 +146,57 @@ export default function LetterGridScreen() {
       duration: 200,
       useNativeDriver: false,
     }).start();
+  };
+
+  // Color wave animation functions
+  const startColorWave = (letter: string) => {
+    // Reset to start
+    colorWaveAnims[letter].setValue(0);
+    
+    Animated.timing(colorWaveAnims[letter], {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: false, // Can't use native driver for color interpolation
+    }).start();
+  };
+
+  const stopColorWave = (letter: string) => {
+    colorWaveAnims[letter].stopAnimation();
+    Animated.timing(colorWaveAnims[letter], {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  // Function to get interpolated rainbow color
+  const getRainbowColor = (progress: Animated.Value, index: number) => {
+    const colors = [
+      '#FFFFFF', // White (default)
+      '#FF6B6B', // Red
+      '#FF8E53', // Orange  
+      '#FFD93D', // Yellow
+      '#6BCF7F', // Green
+      '#4ECDC4', // Cyan
+      '#45B7D1', // Blue
+      '#9B59B6', // Purple
+      '#FFFFFF', // White (back to default)
+    ];
+    
+    return progress.interpolate({
+      inputRange: [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1],
+      outputRange: [
+        colors[0], // White
+        colors[(index % 7) + 1], // Start with letter's rainbow color
+        colors[((index + 1) % 7) + 1],
+        colors[((index + 2) % 7) + 1],
+        colors[((index + 3) % 7) + 1],
+        colors[((index + 4) % 7) + 1],
+        colors[((index + 5) % 7) + 1],
+        colors[((index + 6) % 7) + 1],
+        colors[8], // Back to white
+      ],
+    });
   };
 
   // Particle burst animation functions
@@ -291,8 +352,26 @@ export default function LetterGridScreen() {
         >
           <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
           <View style={styles.letterContainer}>
-            <Text style={styles.letterText}>{item}</Text>
-            <Text style={styles.letterTextLowercase}>{item.toLowerCase()}</Text>
+            <Animated.Text 
+              style={[
+                styles.letterText,
+                {
+                  color: getRainbowColor(colorWaveAnims[item], index),
+                },
+              ]}
+            >
+              {item}
+            </Animated.Text>
+            <Animated.Text 
+              style={[
+                styles.letterTextLowercase,
+                {
+                  color: getRainbowColor(colorWaveAnims[item], index + 3),
+                },
+              ]}
+            >
+              {item.toLowerCase()}
+            </Animated.Text>
           </View>
         </Pressable>
       </Animated.View>
@@ -458,7 +537,6 @@ const styles = StyleSheet.create({
   letterText: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: COLORS.white,
     textShadowColor: COLORS.shadow,
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
@@ -504,7 +582,6 @@ const styles = StyleSheet.create({
   letterTextLowercase: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.white,
     textShadowColor: COLORS.shadow,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
