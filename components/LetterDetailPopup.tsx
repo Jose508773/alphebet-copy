@@ -117,22 +117,40 @@ export default function LetterDetailPopup({
             },
           ]}
         >
-          <Animated.Text
-            style={[
-              styles.letter,
-              {
-                color: letterColor,
-                transform: [
-                  { scale: letterAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  })},
-                ],
-              },
-            ]}
-          >
-            {letter}
-          </Animated.Text>
+          <View style={styles.letterContainer}>
+            <Animated.Text
+              style={[
+                styles.letter,
+                {
+                  color: letterColor,
+                  transform: [
+                    { scale: letterAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    })},
+                  ],
+                },
+              ]}
+            >
+              {letter}
+            </Animated.Text>
+            <Animated.Text
+              style={[
+                styles.letterLowercase,
+                {
+                  color: letterColor,
+                  transform: [
+                    { scale: letterAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    })},
+                  ],
+                },
+              ]}
+            >
+              {letter.toLowerCase()}
+            </Animated.Text>
+          </View>
           <Animated.Text
             style={[
               styles.word,
@@ -279,17 +297,30 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   letter: {
-    fontSize: 100,
+    fontSize: 80,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
     color: COLORS.primary,
     textShadowColor: COLORS.shadow,
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     backgroundColor: COLORS.pastelLavender,
-    borderRadius: 20,
-    padding: 10,
+    borderRadius: 15,
+    padding: 15,
+    marginRight: 10,
+  },
+  letterLowercase: {
+    fontSize: 60,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: COLORS.primary,
+    textShadowColor: COLORS.shadow,
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    backgroundColor: COLORS.pastelMint,
+    borderRadius: 15,
+    padding: 12,
+    opacity: 0.9,
   },
   word: {
     fontSize: 32,
@@ -414,5 +445,11 @@ const styles = StyleSheet.create({
   },
   highContrastText: {
     color: COLORS.highContrastText,
+  },
+  letterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 30,
   },
 }); 
