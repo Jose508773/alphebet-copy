@@ -5,6 +5,7 @@ import { COLORS, FONTS } from '../../constants/StyleGuide';
 import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
 import DepthTransition from '../../components/DepthTransition';
+import PerspectiveNavigation from '../../components/PerspectiveNavigation';
 import { useAccessibility } from '../../constants/AccessibilityContext';
 
 import { Collapsible } from '@/components/Collapsible';
@@ -16,14 +17,25 @@ export default function TabTwoScreen() {
   const { highContrast } = useAccessibility();
   const [showDepthTransition, setShowDepthTransition] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
+  const [showPerspectiveNav, setShowPerspectiveNav] = useState(false);
+  const [perspectiveType, setPerspectiveType] = useState<'zoom' | 'rotate' | 'flip' | 'cube'>('zoom');
 
   const handleDepthTransitionComplete = () => {
     setShowDepthTransition(false);
   };
 
+  const handlePerspectiveNavComplete = () => {
+    setShowPerspectiveNav(false);
+  };
+
   const triggerDepthTransition = (direction: 'forward' | 'backward') => {
     setTransitionDirection(direction);
     setShowDepthTransition(true);
+  };
+
+  const triggerPerspectiveNav = (type: 'zoom' | 'rotate' | 'flip' | 'cube') => {
+    setPerspectiveType(type);
+    setShowPerspectiveNav(true);
   };
 
   return (
@@ -62,6 +74,52 @@ export default function TabTwoScreen() {
             • Dynamic element scaling
           </ThemedText>
         </ThemedView>
+
+        {/* Perspective Navigation Demo Section */}
+        <ThemedView style={styles.perspectiveDemoContainer}>
+          <ThemedText type="title" style={styles.demoTitle}>🎯 Perspective Navigation Demo</ThemedText>
+          <ThemedText style={styles.demoDescription}>
+            Dramatic perspective changes with 3D rotations and zoom effects!
+          </ThemedText>
+          
+          <View style={styles.perspectiveButtonContainer}>
+            <Pressable
+              style={[styles.perspectiveButton, styles.zoomButton]}
+              onPress={() => triggerPerspectiveNav('zoom')}
+            >
+              <Text style={styles.perspectiveButtonText}>🔍 Zoom</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.perspectiveButton, styles.rotateButton]}
+              onPress={() => triggerPerspectiveNav('rotate')}
+            >
+              <Text style={styles.perspectiveButtonText}>🔄 Rotate</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.perspectiveButton, styles.flipButton]}
+              onPress={() => triggerPerspectiveNav('flip')}
+            >
+              <Text style={styles.perspectiveButtonText}>🔃 Flip</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.perspectiveButton, styles.cubeButton]}
+              onPress={() => triggerPerspectiveNav('cube')}
+            >
+              <Text style={styles.perspectiveButtonText}>📦 Cube</Text>
+            </Pressable>
+          </View>
+          
+          <ThemedText style={styles.demoInfo}>
+            • 3D perspective transformations{'\n'}
+            • Multiple animation types{'\n'}
+            • Dramatic visual effects{'\n'}
+            • Smooth transition sequences
+          </ThemedText>
+        </ThemedView>
+
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
@@ -143,6 +201,14 @@ export default function TabTwoScreen() {
         direction={transitionDirection}
         duration={2500}
       />
+
+      {/* Perspective Navigation */}
+      <PerspectiveNavigation
+        isVisible={showPerspectiveNav}
+        onTransitionComplete={handlePerspectiveNavComplete}
+        perspectiveType={perspectiveType}
+        duration={1800}
+      />
     </>
   );
 }
@@ -210,5 +276,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.secondaryText,
     textAlign: 'left',
+  },
+  perspectiveDemoContainer: {
+    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  perspectiveButtonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  perspectiveButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 6,
+    marginHorizontal: 5,
+    marginVertical: 5,
+    borderWidth: 1,
+  },
+  zoomButton: {
+    backgroundColor: COLORS.brightBlue,
+    borderColor: COLORS.brightBlue,
+  },
+  rotateButton: {
+    backgroundColor: COLORS.brightGreen,
+    borderColor: COLORS.brightGreen,
+  },
+  flipButton: {
+    backgroundColor: COLORS.brightPurple,
+    borderColor: COLORS.brightPurple,
+  },
+  cubeButton: {
+    backgroundColor: COLORS.brightYellow,
+    borderColor: COLORS.brightYellow,
+  },
+  perspectiveButtonText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
