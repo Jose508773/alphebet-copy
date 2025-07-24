@@ -12,6 +12,8 @@ import AnimatedBackground from '../../components/AnimatedBackground';
 import LetterPreview from '../../components/LetterPreview';
 import SoundPreviewButton from '../../components/SoundPreviewButton';
 import { speechUtils } from '../../utils/SpeechUtils';
+import FloatingElements, { FloatingLetters, FloatingEmojis, FloatingBubbles } from '../../components/FloatingElements';
+import MorphingShapes, { FloatingGeometry, MagicalStars, PlayfulShapes } from '../../components/MorphingShapes';
 
 const LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 const NUM_COLUMNS = 5;
@@ -677,6 +679,14 @@ export default function LetterGridScreen() {
           },
         ]}
       />
+      
+      {/* Floating Background Elements */}
+      <FloatingLetters count={8} speed="slow" />
+      <FloatingEmojis count={6} speed="medium" />
+      <FloatingBubbles count={12} speed="fast" />
+      <MagicalStars count={4} />
+      <PlayfulShapes count={7} />
+      
       {/* Header with back button */}
       <View style={styles.header}>
         <Pressable
