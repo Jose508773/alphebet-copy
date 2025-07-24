@@ -35,6 +35,14 @@ export default function LetterGridScreen() {
     }, {} as { [key: string]: Animated.Value })
   ).current;
 
+  // Animation refs for each letter's glow effect
+  const glowAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
+
   const handleLetterPress = (letter: string) => {
     setSelectedLetter(letter);
     setPopupVisible(true);
@@ -83,10 +91,39 @@ export default function LetterGridScreen() {
 
   const handlePressIn = (letter: string) => {
     setPressedLetter(letter);
+    startGlow(letter);
   };
 
   const handlePressOut = (letter: string) => {
     setPressedLetter(null);
+    stopGlow(letter);
+  };
+
+  // Glow animation functions
+  const startGlow = (letter: string) => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnims[letter], {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: false, // Can't use native driver for shadow effects
+        }),
+        Animated.timing(glowAnims[letter], {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  };
+
+  const stopGlow = (letter: string) => {
+    glowAnims[letter].stopAnimation();
+    Animated.timing(glowAnims[letter], {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
   };
 
   const handleClosePopup = () => {
@@ -144,31 +181,47 @@ export default function LetterGridScreen() {
         ],
       }}
     >
-      <Pressable
-        style={({ pressed }) => [
-          styles.letterButton,
-          { backgroundColor: RAINBOW[index % RAINBOW.length], borderColor: COLORS.white },
-          pressed && styles.letterButtonPressed,
-          highContrast && styles.letterButtonHighContrast,
+      <Animated.View
+        style={[
+          styles.glowContainer,
+          {
+            shadowOpacity: glowAnims[item].interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 0.8],
+            }),
+            shadowRadius: glowAnims[item].interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 20],
+            }),
+          },
         ]}
-        accessibilityLabel={`Letter ${item}`}
-        accessibilityRole="button"
-        onPress={() => handleLetterPress(item)}
-        onPressIn={() => {
-          handlePressIn(item);
-          startWobble(item);
-        }}
-        onPressOut={() => {
-          handlePressOut(item);
-          stopWobble(item);
-        }}
       >
-        <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
-        <View style={styles.letterContainer}>
-          <Text style={styles.letterText}>{item}</Text>
-          <Text style={styles.letterTextLowercase}>{item.toLowerCase()}</Text>
-        </View>
-      </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.letterButton,
+            { backgroundColor: RAINBOW[index % RAINBOW.length], borderColor: COLORS.white },
+            pressed && styles.letterButtonPressed,
+            highContrast && styles.letterButtonHighContrast,
+          ]}
+          accessibilityLabel={`Letter ${item}`}
+          accessibilityRole="button"
+          onPress={() => handleLetterPress(item)}
+          onPressIn={() => {
+            handlePressIn(item);
+            startWobble(item);
+          }}
+          onPressOut={() => {
+            handlePressOut(item);
+            stopWobble(item);
+          }}
+        >
+          <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
+          <View style={styles.letterContainer}>
+            <Text style={styles.letterText}>{item}</Text>
+            <Text style={styles.letterTextLowercase}>{item.toLowerCase()}</Text>
+          </View>
+        </Pressable>
+      </Animated.View>
     </Animated.View>
   );
 
@@ -329,6 +382,11 @@ const styles = StyleSheet.create({
   },
   letterContainer: {
     alignItems: 'center',
+  },
+  glowContainer: {
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 15,
   },
   letterTextLowercase: {
     fontSize: 20,
