@@ -53,6 +53,8 @@ export default function LetterGridScreen() {
     forest: ['#11998e', '#38ef7d', '#56ab2f', '#a8e6cf', '#11998e'],
     warm: ['#ff9a9e', '#fecfef', '#fecfef', '#ffc3a0', '#ff9a9e'],
     cool: ['#a8edea', '#fed6e3', '#667eea', '#764ba2', '#a8edea'],
+    vibrant: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'],
+    purple: ['#a29bfe', '#6c5ce7', '#fd79a8', '#fdcb6e', '#e17055'],
   };
   
   // Start gradient animation
@@ -656,12 +658,23 @@ export default function LetterGridScreen() {
           {
             backgroundColor: gradientAnim.interpolate({
               inputRange: [0, 0.25, 0.5, 0.75, 1],
-              outputRange: gradientSchemes.sunset, // Change to: ocean, forest, warm, or cool
+              outputRange: gradientSchemes.vibrant, // Change to: ocean, forest, warm, cool, purple, or sunset
             }),
           },
         ]}
       />
-      <AnimatedBackground />
+      {/* Additional gradient overlay for more vibrant effect */}
+      <Animated.View
+        style={[
+          styles.gradientOverlay,
+          {
+            opacity: gradientAnim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0.3, 0.7, 0.3],
+            }),
+          },
+        ]}
+      />
       {/* Header with back button */}
       <View style={styles.header}>
         <Pressable
@@ -672,8 +685,8 @@ export default function LetterGridScreen() {
           <Text style={styles.backButtonText}>🏠 Home</Text>
         </Pressable>
       </View>
-      {/* Fun confetti background */}
-      <View style={styles.confettiBg} pointerEvents="none" />
+      {/* Fun confetti background - reduced opacity to show gradient */}
+      <View style={[styles.confettiBg, { opacity: 0.05 }]} pointerEvents="none" />
       
       {/* Particle effects container */}
       <View style={styles.particleContainer} pointerEvents="none">
@@ -747,13 +760,18 @@ const styles = StyleSheet.create({
   },
   animatedBackground: {
     ...StyleSheet.absoluteFillObject,
+    zIndex: -2,
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
     zIndex: -1,
+    backgroundColor: '#4ecdc4',
   },
   confettiBg: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 0,
-    opacity: 0.12,
-    backgroundImage: 'repeating-linear-gradient(135deg, #FFD54F 0 10px, #FF80AB 10px 20px, #6EC6FF 20px 30px, #B388FF 30px 40px, #A7FFEB 40px 50px)',
+    opacity: 0.05,
+    // Removed backgroundImage to let gradient show through
   },
   gridContainer: {
     alignItems: 'center',
