@@ -7,6 +7,7 @@ import BookTransition from '../components/BookTransition';
 import PulsingButton from '../components/PulsingButton';
 import { useAccessibility } from '../constants/AccessibilityContext';
 import AnimatedBackground from '../components/AnimatedBackground';
+import StaggeredTextAnimation, { MultiLineStaggeredText, AdvancedStaggeredText } from '../components/StaggeredTextAnimation';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,6 +15,9 @@ export default function CoverScreen() {
   const { highContrast } = useAccessibility();
   const [isLoading, setIsLoading] = useState(true);
   const [showBookTransition, setShowBookTransition] = useState(false);
+  const [showTitle, setShowTitle] = useState(false);
+  const [showSubtitle, setShowSubtitle] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
   const titleText = "Welcome to Alphabet Adventures!";
   const letterAnims = useRef(
     Array.from({ length: titleText.length }, () => new Animated.Value(0))
@@ -33,17 +37,10 @@ export default function CoverScreen() {
         useNativeDriver: true,
       }).start();
       
-      // Start letter animations
-      const letterAnimations = letterAnims.slice(0, titleText.length).map((anim, index) =>
-        Animated.timing(anim, {
-          toValue: 1,
-          duration: 300,
-          delay: 100 + index * 50,
-          useNativeDriver: true,
-        })
-      );
-      
-      Animated.parallel(letterAnimations).start();
+      // Trigger staggered text animations in sequence
+      setTimeout(() => setShowTitle(true), 300);
+      setTimeout(() => setShowSubtitle(true), 2200);
+      setTimeout(() => setShowDescription(true), 3800);
       
       // Start button pulse after letters finish
       setTimeout(() => {
@@ -77,31 +74,48 @@ export default function CoverScreen() {
     router.replace('/(tabs)');
   };
 
-  const renderAnimatedTitle = () => {
+  const renderStaggeredContent = () => {
     return (
-      <View style={styles.animatedTitleContainer}>
-        {titleText.split('').map((char, index) => {
-          const animValue = letterAnims[index] || new Animated.Value(0);
-          return (
-            <Animated.Text
-              key={index}
-              style={[
-                styles.animatedLetter,
-                {
-                  opacity: animValue,
-                  transform: [{
-                    translateY: animValue.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [20, 0],
-                    }),
-                  }],
-                },
-              ]}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </Animated.Text>
-          );
-        })}
+      <View style={styles.staggeredContentContainer}>
+        {/* Main Title with Center-Out Bounce Animation */}
+        {showTitle && (
+          <AdvancedStaggeredText
+            text={titleText}
+            style={Object.assign({}, styles.animatedLetter, highContrast && styles.titleHighContrast)}
+            pattern="center-out"
+            animationType="bounce"
+            duration={600}
+            baseDelay={80}
+          />
+        )}
+        
+        {/* Subtitle with Wave Animation */}
+        {showSubtitle && (
+          <StaggeredTextAnimation
+            text="🎓 Learn Your ABCs with Fun!"
+            style={Object.assign({}, styles.subtitle, highContrast && styles.subtitleHighContrast)}
+            animationType="wave"
+            staggerType="word"
+            duration={700}
+            delay={150}
+          />
+        )}
+        
+        {/* Description with Typewriter Effect */}
+        {showDescription && (
+          <MultiLineStaggeredText
+            lines={[
+              "🌟 Interactive Learning",
+              "🎵 Fun Sound Effects", 
+              "🎨 Beautiful Animations",
+              "🚀 Start Your Journey!"
+            ]}
+            style={Object.assign({}, styles.featuresText, highContrast && styles.featuresTextHighContrast)}
+            animationType="typewriter"
+            lineDelay={600}
+            letterDelay={40}
+          />
+        )}
       </View>
     );
   };
@@ -141,13 +155,7 @@ export default function CoverScreen() {
             styles.titleContainer, 
             highContrast && styles.titleContainerHighContrast
           ]}>
-            {renderAnimatedTitle()}
-            <Text style={[
-              styles.subtitle, 
-              highContrast && styles.subtitleHighContrast
-            ]}>
-              🎓 Learn Your ABCs with Fun!
-            </Text>
+            {renderStaggeredContent()}
           </View>
         </View>
 
@@ -269,6 +277,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginBottom: 15,
+  },
+  staggeredContentContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  titleHighContrast: {
+    color: COLORS.highContrastText,
   },
   animatedLetter: {
     fontSize: 22,
