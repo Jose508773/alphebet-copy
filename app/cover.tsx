@@ -9,6 +9,7 @@ import { useAccessibility } from '../constants/AccessibilityContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 import StaggeredTextAnimation, { MultiLineStaggeredText, AdvancedStaggeredText } from '../components/StaggeredTextAnimation';
 import FloatingElements, { FloatingLetters, FloatingEmojis, FloatingBubbles } from '../components/FloatingElements';
+import MorphingShapes, { FloatingGeometry, MagicalStars, PlayfulShapes } from '../components/MorphingShapes';
 
 const { width, height } = Dimensions.get('window');
 
@@ -129,6 +130,10 @@ export default function CoverScreen() {
       <FloatingLetters count={6} speed="slow" />
       <FloatingEmojis count={4} speed="slow" />
       <FloatingBubbles count={8} speed="medium" />
+      
+      {/* Morphing Shapes */}
+      <MagicalStars count={3} />
+      <PlayfulShapes count={5} />
       
       {/* Loading Wheel */}
       {isLoading && (
