@@ -1,165 +1,78 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Pressable, 
-  Platform,
-  Animated,
-  Dimensions
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Animated, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { COLORS, FONTS } from '../constants/StyleGuide';
+import LoadingWheel from '../components/LoadingWheel';
 import { useAccessibility } from '../constants/AccessibilityContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 
 const { width, height } = Dimensions.get('window');
 
-export default function CoverPage() {
-  const [buttonPressed, setButtonPressed] = useState(false);
-  const [cardHovered, setCardHovered] = useState(false);
-  const [buttonHovered, setButtonHovered] = useState(false);
+export default function CoverScreen() {
   const { highContrast } = useAccessibility();
-  
-  // Animation refs
-  const titleAnim = useRef(new Animated.Value(0)).current;
-  const cardAnim = useRef(new Animated.Value(0)).current;
-  const buttonAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const floatingAnim = useRef(new Animated.Value(0)).current;
-  const cardHoverAnim = useRef(new Animated.Value(1)).current;
-  const buttonHoverAnim = useRef(new Animated.Value(1)).current;
-  
-  // Letter-by-letter animation refs
-  const titleText = "🎓 Alphabet Learning";
+  const [isLoading, setIsLoading] = useState(true);
+  const titleText = "Welcome to Alphabet Adventures!";
   const letterAnims = useRef(
     Array.from({ length: titleText.length }, () => new Animated.Value(0))
   ).current;
-
-  // Start animations on mount
+  const buttonPulseAnim = useRef(new Animated.Value(1)).current;
+  const contentOpacityAnim = useRef(new Animated.Value(0)).current;
+  
   useEffect(() => {
-    // Main entrance animations
-    const animations = [
-      Animated.timing(titleAnim, {
+    // Simulate loading time
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+      
+      // Fade in content after loading
+      Animated.timing(contentOpacityAnim, {
         toValue: 1,
         duration: 800,
         useNativeDriver: true,
-      }),
-      Animated.timing(cardAnim, {
-        toValue: 1,
-        duration: 1000,
-        delay: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonAnim, {
-        toValue: 1,
-        duration: 1200,
-        delay: 600,
-        useNativeDriver: true,
-      }),
-    ];
-    
-    // Letter-by-letter staggered animation
-    const letterAnimations = letterAnims.slice(0, titleText.length).map((anim, index) =>
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 300,
-        delay: 100 + index * 50, // Stagger each letter by 50ms
-        useNativeDriver: true,
-      })
-    );
-    
-    // Floating animation (continuous)
-    const floatingAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatingAnim, {
+      }).start();
+      
+      // Start letter animations
+      const letterAnimations = letterAnims.slice(0, titleText.length).map((anim, index) =>
+        Animated.timing(anim, {
           toValue: 1,
-          duration: 3000,
+          duration: 300,
+          delay: 100 + index * 50,
           useNativeDriver: true,
-        }),
-        Animated.timing(floatingAnim, {
-          toValue: 0,
-          duration: 3000,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    
-    // Button pulse animation (continuous)
-    const pulseAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.05,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    
-    Animated.parallel([...animations, ...letterAnimations]).start();
-    floatingAnimation.start();
-    
-    // Start pulse animation after initial animations
-    setTimeout(() => {
-      pulseAnimation.start();
-    }, 1800);
+        })
+      );
+      
+      Animated.parallel(letterAnimations).start();
+      
+      // Start button pulse after letters finish
+      setTimeout(() => {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(buttonPulseAnim, {
+              toValue: 1.05,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(buttonPulseAnim, {
+              toValue: 1,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+          ])
+        ).start();
+      }, 1500);
+      
+    }, 2500); // 2.5 seconds loading
+
+    return () => clearTimeout(loadingTimer);
   }, []);
 
-  // Card hover effects
-  useEffect(() => {
-    Animated.spring(cardHoverAnim, {
-      toValue: cardHovered ? 1.02 : 1,
-      useNativeDriver: true,
-      tension: 300,
-      friction: 10,
-    }).start();
-  }, [cardHovered]);
-
-  // Button hover effects
-  useEffect(() => {
-    Animated.spring(buttonHoverAnim, {
-      toValue: buttonHovered ? 1.05 : 1,
-      useNativeDriver: true,
-      tension: 300,
-      friction: 10,
-    }).start();
-  }, [buttonHovered]);
-
   const handleStartLearning = () => {
-    setButtonPressed(true);
-    
-    // Button press animation
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    
-    // Navigate to the main app after animation
-    setTimeout(() => {
-      router.replace('/(tabs)');
-    }, 300);
+    router.replace('/(tabs)');
   };
 
-  // Render letters with staggered animation
   const renderAnimatedTitle = () => {
     return (
       <View style={styles.animatedTitleContainer}>
         {titleText.split('').map((char, index) => {
-          // Safety check to ensure animated value exists
           const animValue = letterAnims[index] || new Animated.Value(0);
           return (
             <Animated.Text
@@ -189,198 +102,104 @@ export default function CoverPage() {
     <View style={styles.container}>
       <AnimatedBackground />
       
-      {/* Enhanced Gradient Overlay */}
+      {/* Loading Wheel */}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <LoadingWheel size={250} visible={isLoading} />
+          <Text style={styles.loadingText}>Loading Alphabet Adventures...</Text>
+        </View>
+      )}
+      
+      {/* Main Content */}
       <Animated.View 
         style={[
-          styles.gradientOverlay,
+          styles.content,
           {
-            transform: [{
-              translateY: floatingAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -10],
-              }),
-            }],
-          },
+            opacity: contentOpacityAnim,
+          }
         ]}
-      />
-      
-      {/* Floating Elements */}
-      <Animated.View
-        style={[
-          styles.floatingElement1,
-          {
-            transform: [{
-              translateY: floatingAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -20],
-              }),
-            }],
-          },
-        ]}
+        pointerEvents={isLoading ? 'none' : 'auto'}
       >
-        <Text style={styles.floatingText}>📚</Text>
-      </Animated.View>
-      
-      <Animated.View
-        style={[
-          styles.floatingElement2,
-          {
-            transform: [{
-              translateY: floatingAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 15],
-              }),
-            }],
-          },
-        ]}
-      >
-        <Text style={styles.floatingText}>✨</Text>
-      </Animated.View>
-      
-      <Animated.View
-        style={[
-          styles.floatingElement3,
-          {
-            transform: [{
-              translateY: floatingAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -25],
-              }),
-            }],
-          },
-        ]}
-      >
-        <Text style={styles.floatingText}>🎵</Text>
-      </Animated.View>
-      
-      <View style={styles.content}>
-        {/* Main Title Section */}
         <View style={styles.titleSection}>
-          <Animated.View 
-            style={[
-              styles.titleContainer,
-              {
-                opacity: titleAnim,
-                transform: [{
-                  translateY: titleAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [50, 0],
-                  }),
-                }],
-              },
-            ]}
-          >
+          <View style={[
+            styles.titleContainer, 
+            highContrast && styles.titleContainerHighContrast
+          ]}>
             {renderAnimatedTitle()}
-            <Animated.Text 
-              style={[
-                styles.subtitle,
-                {
-                  opacity: titleAnim,
-                  transform: [{
-                    translateY: titleAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [30, 0],
-                    }),
-                  }],
-                },
-              ]}
-            >
-              Interactive & Fun
-            </Animated.Text>
-          </Animated.View>
+            <Text style={[
+              styles.subtitle, 
+              highContrast && styles.subtitleHighContrast
+            ]}>
+              🎓 Learn Your ABCs with Fun!
+            </Text>
+          </View>
         </View>
 
-        {/* Enhanced Description Section */}
         <View style={styles.descriptionSection}>
-          <Animated.View 
-            style={[
-              styles.descriptionCard,
-              {
-                opacity: cardAnim,
-                transform: [
-                  {
-                    translateY: cardAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [100, 0],
-                    }),
-                  },
-                  {
-                    scale: cardHoverAnim,
-                  },
-                ],
-              },
-            ]}
-
-          >
-            <Text style={styles.descriptionTitle}>Welcome to Your Learning Adventure!</Text>
-            
-            <Text style={styles.descriptionText}>
-              Discover the magical world of letters through our interactive alphabet learning app. 
-              Perfect for children and anyone eager to master the ABCs in a fun, engaging way.
+          <View style={[
+            styles.descriptionCard,
+            highContrast && styles.descriptionCardHighContrast
+          ]}>
+            <Text style={[
+              styles.descriptionTitle,
+              highContrast && styles.descriptionTitleHighContrast
+            ]}>
+              🌟 Interactive Learning Experience
+            </Text>
+            <Text style={[
+              styles.descriptionText,
+              highContrast && styles.descriptionTextHighContrast
+            ]}>
+              Discover letters through colorful animations, sounds, and interactive games designed to make learning the alphabet fun and engaging for young learners.
             </Text>
             
             <View style={styles.featuresContainer}>
-              <Text style={styles.featuresText}>
-                ✨ Interactive letter buttons with voice pronunciation{'\n'}
-                🎯 Quiz mode with voice-guided questions{'\n'}
-                🎵 Story and song mode for complete learning{'\n'}
-                🔊 Clear audio feedback and pronunciation{'\n'}
-                🎨 Beautiful, colorful design that makes learning fun
+              <Text style={[
+                styles.featuresText,
+                highContrast && styles.featuresTextHighContrast
+              ]}>
+                ✨ Colorful letter animations{'\n'}
+                🔊 Audio pronunciation guide{'\n'}
+                🎮 Interactive quiz mode{'\n'}
+                🎨 Beautiful visual effects
               </Text>
             </View>
             
-            <Text style={styles.instructionText}>
-              Ready to start your alphabet journey? Click the button below to begin exploring all 26 letters!
+            <Text style={[
+              styles.instructionText,
+              highContrast && styles.instructionTextHighContrast
+            ]}>
+              Tap any letter to hear its sound and see fun animations!
             </Text>
-          </Animated.View>
+          </View>
         </View>
 
-        {/* Enhanced Start Learning Button */}
         <View style={styles.buttonSection}>
           <Animated.View
-            style={[
-              {
-                opacity: buttonAnim,
-                transform: [
-                  {
-                    translateY: buttonAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [50, 0],
-                    }),
-                  },
-                  {
-                    scale: Animated.multiply(scaleAnim, Animated.multiply(pulseAnim, buttonHoverAnim)),
-                  },
-                ],
-              },
-            ]}
+            style={{
+              transform: [{ scale: buttonPulseAnim }],
+            }}
           >
             <Pressable
-              style={[
+              style={({ pressed }) => [
                 styles.startButton,
-                buttonPressed && styles.startButtonPressed,
-                buttonHovered && styles.startButtonHovered
+                pressed && styles.startButtonPressed,
+                highContrast && styles.startButtonHighContrast,
               ]}
               onPress={handleStartLearning}
-
-              accessibilityLabel="Start learning the alphabet"
               accessibilityRole="button"
+              accessibilityLabel="Start learning the alphabet"
             >
-              <View style={[
-                styles.buttonGradient,
-                buttonHovered && styles.buttonGradientHovered
+              <Text style={[
+                styles.startButtonText,
+                highContrast && styles.startButtonTextHighContrast
               ]}>
-                <Animated.Text style={[
-                  styles.startButtonText,
-                  buttonPressed && styles.startButtonTextPressed
-                ]}>
-                  🚀 Start Learning
-                </Animated.Text>
-              </View>
+                🚀 Start Learning!
+              </Text>
             </Pressable>
           </Animated.View>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -388,208 +207,185 @@ export default function CoverPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.pastelMint,
+    backgroundColor: COLORS.gradientStart,
   },
-  gradientOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    zIndex: 1,
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    zIndex: 1000,
   },
-  floatingElement1: {
-    position: 'absolute',
-    top: '15%',
-    right: '10%',
-    zIndex: 2,
-  },
-  floatingElement2: {
-    position: 'absolute',
-    top: '25%',
-    left: '8%',
-    zIndex: 2,
-  },
-  floatingElement3: {
-    position: 'absolute',
-    bottom: '30%',
-    right: '15%',
-    zIndex: 2,
-  },
-  floatingText: {
-    fontSize: 40,
-    opacity: 0.7,
+  loadingText: {
+    marginTop: 30,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    fontFamily: FONTS.heading,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 40,
-    paddingBottom: 20,
-    zIndex: 2,
     justifyContent: 'space-between',
+    padding: 20,
+    paddingTop: 60,
   },
   titleSection: {
-    alignItems: 'center',
-    marginBottom: 30,
-    flex: 0.18,
+    flex: 2,
     justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   titleContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 20,
-    paddingHorizontal: 25,
-    paddingVertical: 16,
+    padding: 25,
+    width: Math.min(width * 0.9, 400),
+    maxWidth: 400,
+    alignItems: 'center',
+    elevation: 8,
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
+  },
+  titleContainerHighContrast: {
+    backgroundColor: COLORS.highContrastBg,
+    borderColor: COLORS.highContrastText,
     borderWidth: 2,
-    borderColor: COLORS.primary,
-    width: '95%',
-    maxWidth: 600,
   },
   animatedTitleContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 15,
   },
   animatedLetter: {
-    fontSize: 36,
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.primary,
     fontFamily: FONTS.heading,
-    textShadowColor: COLORS.shadow,
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 22,
-    color: COLORS.secondary,
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.secondaryText,
     textAlign: 'center',
     fontFamily: FONTS.body,
-    fontWeight: '600',
+  },
+  subtitleHighContrast: {
+    color: COLORS.highContrastText,
   },
   descriptionSection: {
-    flex: 0.55,
+    flex: 3,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    marginBottom: 25,
+    paddingHorizontal: 10,
+    marginBottom: 20,
   },
   descriptionCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 20,
-    padding: 24,
+    padding: 25,
+    width: Math.min(width * 0.9, 400),
+    maxWidth: 400,
+    minHeight: 300,
+    elevation: 8,
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  descriptionCardHighContrast: {
+    backgroundColor: COLORS.highContrastBg,
+    borderColor: COLORS.highContrastText,
     borderWidth: 2,
-    borderColor: COLORS.primary,
-    width: '98%',
-    maxWidth: 650,
-    minHeight: 320,
   },
   descriptionTitle: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.primary,
     textAlign: 'center',
+    marginBottom: 15,
     fontFamily: FONTS.heading,
-    marginBottom: 16,
-    textShadowColor: COLORS.shadow,
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  },
+  descriptionTitleHighContrast: {
+    color: COLORS.highContrastText,
   },
   descriptionText: {
-    fontSize: 17,
+    fontSize: 16,
+    lineHeight: 24,
     color: COLORS.primaryText,
     textAlign: 'center',
+    marginBottom: 20,
     fontFamily: FONTS.body,
-    lineHeight: 24,
-    marginBottom: 18,
+  },
+  descriptionTextHighContrast: {
+    color: COLORS.highContrastText,
   },
   featuresContainer: {
-    backgroundColor: COLORS.pastelLavender,
+    backgroundColor: 'rgba(255, 233, 244, 0.8)',
     borderRadius: 15,
-    padding: 20,
-    marginBottom: 18,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-    minHeight: 140,
+    padding: 15,
+    marginBottom: 20,
+    minHeight: 120,
   },
   featuresText: {
     fontSize: 15,
+    lineHeight: 22,
     color: COLORS.primaryText,
     textAlign: 'left',
     fontFamily: FONTS.body,
-    lineHeight: 22,
+  },
+  featuresTextHighContrast: {
+    color: COLORS.highContrastText,
   },
   instructionText: {
-    fontSize: 16,
-    color: COLORS.secondary,
-    textAlign: 'center',
-    fontFamily: FONTS.body,
-    fontWeight: '600',
+    fontSize: 14,
     lineHeight: 20,
+    color: COLORS.secondaryText,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    fontFamily: FONTS.body,
+  },
+  instructionTextHighContrast: {
+    color: COLORS.highContrastText,
   },
   buttonSection: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    flex: 0.27,
-    justifyContent: 'flex-end',
-    paddingBottom: 30,
-    paddingTop: 10,
+    paddingBottom: 40,
+    paddingTop: 20,
   },
   startButton: {
-    borderRadius: 35,
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 15,
-    borderWidth: 3,
-    borderColor: COLORS.primary,
-    minWidth: 320,
-    overflow: 'hidden',
-    transform: [{ scale: 1.05 }],
-  },
-  startButtonHovered: {
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-    elevation: 20,
-  },
-  buttonGradient: {
     backgroundColor: COLORS.accent,
-    paddingHorizontal: 70,
-    paddingVertical: 28,
-  },
-  buttonGradientHovered: {
-    backgroundColor: COLORS.brightGreen,
+    paddingHorizontal: 40,
+    paddingVertical: 15,
+    borderRadius: 25,
+    elevation: 5,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   startButtonPressed: {
-    backgroundColor: COLORS.brightGreen,
+    backgroundColor: COLORS.primary,
+    transform: [{ scale: 0.98 }],
+  },
+  startButtonHighContrast: {
+    backgroundColor: COLORS.highContrastText,
+    borderColor: COLORS.highContrastBg,
+    borderWidth: 2,
   },
   startButtonText: {
-    color: COLORS.white,
-    fontSize: 30,
+    fontSize: 18,
     fontWeight: 'bold',
+    color: COLORS.white,
     textAlign: 'center',
     fontFamily: FONTS.heading,
-    textShadowColor: COLORS.shadow,
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
-  startButtonTextPressed: {
-    color: COLORS.white,
+  startButtonTextHighContrast: {
+    color: COLORS.highContrastBg,
   },
 }); 
