@@ -9,6 +9,7 @@ import { StorySongMode } from '../../components/StorySongMode';
 import { useAccessibility } from '../../constants/AccessibilityContext';
 import { COLORS, RAINBOW, FONTS, LETTER_EMOJI } from '../../constants/StyleGuide';
 import AnimatedBackground from '../../components/AnimatedBackground';
+import BookTransition from '../../components/BookTransition';
 import { speechUtils } from '../../utils/SpeechUtils';
 
 const LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
@@ -35,6 +36,8 @@ export default function LetterGridScreen() {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const scrollAnim = useRef(new Animated.Value(0)).current;
+  const [showBookTransition, setShowBookTransition] = useState(false);
+  const [pendingLetter, setPendingLetter] = useState<string | null>(null);
 
   // Animation refs for each letter's wobble effect
   const wobbleAnims = useRef(
@@ -61,13 +64,22 @@ export default function LetterGridScreen() {
   ).current;
 
   const handleLetterPress = (letter: string) => {
-    setSelectedLetter(letter);
-    setPopupVisible(true);
+    // Trigger book transition first
+    setPendingLetter(letter);
+    setShowBookTransition(true);
+    
     // Speak the letter when pressed
     speechUtils.speakLetter(letter);
     // Create particle burst effect
     const letterIndex = LETTERS.indexOf(letter);
     createParticleBurst(letterIndex);
+  };
+
+  const handleBookTransitionComplete = () => {
+    setShowBookTransition(false);
+    setSelectedLetter(pendingLetter);
+    setPopupVisible(true);
+    setPendingLetter(null);
   };
 
   // Wobble animation functions
@@ -476,6 +488,15 @@ export default function LetterGridScreen() {
           </View>
         </View>
       </Modal>
+      
+      {/* Book Transition */}
+      <BookTransition
+        isVisible={showBookTransition}
+        onTransitionComplete={handleBookTransitionComplete}
+        direction="open"
+        duration={1200}
+      />
+
       <LetterDetailPopup
         visible={popupVisible}
         letter={selectedLetter || ''}
