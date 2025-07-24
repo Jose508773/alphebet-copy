@@ -20,16 +20,73 @@ export default function LetterGridScreen() {
   const [popupVisible, setPopupVisible] = useState(false);
   const [practiceMode, setPracticeMode] = useState(false);
   const [storySongMode, setStorySongMode] = useState(false);
+  const [hoveredLetter, setHoveredLetter] = useState<string | null>(null);
+  const [pressedLetter, setPressedLetter] = useState<string | null>(null);
   const { captions, setCaptions, highContrast, setHighContrast, volume, setVolume } = useAccessibility();
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const scrollAnim = useRef(new Animated.Value(0)).current;
+
+  // Animation refs for each letter's wobble effect
+  const wobbleAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
 
   const handleLetterPress = (letter: string) => {
     setSelectedLetter(letter);
     setPopupVisible(true);
     // Speak the letter when pressed
     speechUtils.speakLetter(letter);
+  };
+
+  // Wobble animation functions
+  const startWobble = (letter: string) => {
+    setHoveredLetter(letter);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(wobbleAnims[letter], {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(wobbleAnims[letter], {
+          toValue: -1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(wobbleAnims[letter], {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(wobbleAnims[letter], {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  const stopWobble = (letter: string) => {
+    setHoveredLetter(null);
+    wobbleAnims[letter].stopAnimation();
+    Animated.timing(wobbleAnims[letter], {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressIn = (letter: string) => {
+    setPressedLetter(letter);
+  };
+
+  const handlePressOut = (letter: string) => {
+    setPressedLetter(null);
   };
 
   const handleClosePopup = () => {
@@ -75,23 +132,44 @@ export default function LetterGridScreen() {
   };
 
   const renderItem = ({ item, index }: { item: string; index: number }) => (
-    <Pressable
-      style={({ pressed }) => [
-        styles.letterButton,
-        { backgroundColor: RAINBOW[index % RAINBOW.length], borderColor: COLORS.white },
-        pressed && styles.letterButtonPressed,
-        highContrast && styles.letterButtonHighContrast,
-      ]}
-      accessibilityLabel={`Letter ${item}`}
-      accessibilityRole="button"
-      onPress={() => handleLetterPress(item)}
+    <Animated.View
+      style={{
+        transform: [
+          {
+            rotate: wobbleAnims[item].interpolate({
+              inputRange: [-1, 1],
+              outputRange: ['-3deg', '3deg'],
+            }),
+          },
+        ],
+      }}
     >
-      <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
-      <View style={styles.letterContainer}>
-        <Text style={styles.letterText}>{item}</Text>
-        <Text style={styles.letterTextLowercase}>{item.toLowerCase()}</Text>
-      </View>
-    </Pressable>
+      <Pressable
+        style={({ pressed }) => [
+          styles.letterButton,
+          { backgroundColor: RAINBOW[index % RAINBOW.length], borderColor: COLORS.white },
+          pressed && styles.letterButtonPressed,
+          highContrast && styles.letterButtonHighContrast,
+        ]}
+        accessibilityLabel={`Letter ${item}`}
+        accessibilityRole="button"
+        onPress={() => handleLetterPress(item)}
+        onPressIn={() => {
+          handlePressIn(item);
+          startWobble(item);
+        }}
+        onPressOut={() => {
+          handlePressOut(item);
+          stopWobble(item);
+        }}
+      >
+        <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
+        <View style={styles.letterContainer}>
+          <Text style={styles.letterText}>{item}</Text>
+          <Text style={styles.letterTextLowercase}>{item.toLowerCase()}</Text>
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 
   if (practiceMode) {
