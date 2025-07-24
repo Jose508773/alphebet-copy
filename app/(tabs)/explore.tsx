@@ -9,6 +9,7 @@ import PerspectiveNavigation from '../../components/PerspectiveNavigation';
 import CardStackShuffle from '../../components/CardStackShuffle';
 import EnhancedGradientBackground from '../../components/EnhancedGradientBackground';
 import { ComplementaryColorPalette, DynamicColorProvider } from '../../components/ComplementaryColorSystem';
+import OptimizedImage, { ImageGallery, ProgressiveImage, ResponsiveImage, imageCache } from '../../components/ImageOptimization';
 import { useAccessibility } from '../../constants/AccessibilityContext';
 
 import { Collapsible } from '@/components/Collapsible';
@@ -30,6 +31,7 @@ export default function TabTwoScreen() {
   const [showComplementaryColors, setShowComplementaryColors] = useState(false);
   const [baseColor, setBaseColor] = useState('#FF69B4');
   const [colorScheme, setColorScheme] = useState<'complementary' | 'triadic' | 'analogous' | 'split-complementary' | 'monochromatic'>('complementary');
+  const [showImageDemo, setShowImageDemo] = useState(false);
 
   const handleDepthTransitionComplete = () => {
     setShowDepthTransition(false);
@@ -339,6 +341,69 @@ export default function TabTwoScreen() {
             • Harmonious combinations{'\n'}
             • Dynamic color palettes{'\n'}
             • Animated transitions
+          </ThemedText>
+        </ThemedView>
+
+        {/* Image Optimization Demo */}
+        <ThemedView style={styles.imageDemoContainer}>
+          <ThemedText type="title" style={styles.demoTitle}>🖼️ Image Optimization Demo</ThemedText>
+          <ThemedText style={styles.demoDescription}>
+            Experience optimized image loading with lazy loading, caching, and progressive enhancement!
+          </ThemedText>
+          
+          <Pressable
+            style={styles.imageToggleButton}
+            onPress={() => setShowImageDemo(!showImageDemo)}
+          >
+            <Text style={styles.imageToggleText}>
+              {showImageDemo ? '🚫 Hide Images' : '📸 Show Images'}
+            </Text>
+          </Pressable>
+          
+          {showImageDemo && (
+            <View style={styles.imageDisplayContainer}>
+              <Text style={styles.imageSectionTitle}>Optimized Images:</Text>
+              
+              {/* Sample optimized images */}
+              <View style={styles.imageRow}>
+                <OptimizedImage
+                  source={{uri: 'https://via.placeholder.com/150x150/FF69B4/FFFFFF?text=A'}}
+                  style={styles.demoImage}
+                  placeholder="🅰️"
+                  lazy={true}
+                  accessibilityLabel="Letter A placeholder"
+                />
+                <OptimizedImage
+                  source={{uri: 'https://via.placeholder.com/150x150/48D1CC/FFFFFF?text=B'}}
+                  style={styles.demoImage}
+                  placeholder="🅱️"
+                  lazy={true}
+                  accessibilityLabel="Letter B placeholder"
+                />
+                <OptimizedImage
+                  source={{uri: 'https://via.placeholder.com/150x150/FFD700/000000?text=C'}}
+                  style={styles.demoImage}
+                  placeholder="©️"
+                  lazy={true}
+                  accessibilityLabel="Letter C placeholder"
+                />
+              </View>
+              
+              <Text style={styles.imageSectionTitle}>Progressive Loading:</Text>
+              <ProgressiveImage
+                lowQualitySource={{uri: 'https://via.placeholder.com/200x100/E6E6FA/666666?text=Low+Quality'}}
+                highQualitySource={{uri: 'https://via.placeholder.com/200x100/8B5CF6/FFFFFF?text=High+Quality'}}
+                style={styles.progressiveImage}
+              />
+            </View>
+          )}
+          
+          <ThemedText style={styles.demoInfo}>
+            • Lazy loading for performance{'\n'}
+            • Progressive image enhancement{'\n'}
+            • Automatic caching system{'\n'}
+            • Responsive image sizing{'\n'}
+            • Error state handling
           </ThemedText>
         </ThemedView>
 
@@ -717,5 +782,59 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
     padding: 10,
+  },
+  imageDemoContainer: {
+    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  imageToggleButton: {
+    backgroundColor: COLORS.brightBlue,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  imageToggleText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  imageDisplayContainer: {
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+  },
+  imageSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  imageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  demoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  progressiveImage: {
+    width: '100%',
+    height: 80,
+    borderRadius: 8,
+    marginBottom: 10,
   },
 });
