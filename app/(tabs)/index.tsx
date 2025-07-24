@@ -75,6 +75,27 @@ export default function LetterGridScreen() {
     }, {} as { [key: string]: Animated.Value })
   ).current;
 
+  const hoverScaleAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(1);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
+
+  const hoverGlowAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
+
+  const hoverBorderAnims = useRef(
+    LETTERS.reduce((acc, letter) => {
+      acc[letter] = new Animated.Value(0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value })
+  ).current;
+
   const handleLetterPress = (letter: string) => {
     // Trigger book transition first
     setPendingLetter(letter);
@@ -253,6 +274,68 @@ export default function LetterGridScreen() {
     ]).start();
   };
 
+  // Hover effects functions
+  const startHoverEffects = (letter: string) => {
+    // Scale animation
+    Animated.spring(hoverScaleAnims[letter], {
+      toValue: 1.1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+
+    // Glow animation
+    Animated.timing(hoverGlowAnims[letter], {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: false, // Can't use native driver for shadow properties
+    }).start();
+
+    // Border animation
+    Animated.timing(hoverBorderAnims[letter], {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false, // Can't use native driver for border properties
+    }).start();
+  };
+
+  const stopHoverEffects = (letter: string) => {
+    // Scale animation
+    Animated.spring(hoverScaleAnims[letter], {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+
+    // Glow animation
+    Animated.timing(hoverGlowAnims[letter], {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+
+    // Border animation
+    Animated.timing(hoverBorderAnims[letter], {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  // Enhanced letter press handlers
+  const handleLetterHoverIn = (letter: string) => {
+    setHoveredLetter(letter);
+    startHoverEffects(letter);
+  };
+
+  const handleLetterHoverOut = (letter: string) => {
+    if (hoveredLetter === letter) {
+      setHoveredLetter(null);
+    }
+    stopHoverEffects(letter);
+  };
+
   // Function to get interpolated rainbow color
   const getRainbowColor = (progress: Animated.Value, index: number) => {
     const colors = [
@@ -392,6 +475,7 @@ export default function LetterGridScreen() {
       style={{
         transform: [
           { perspective: 1000 },
+          { scale: hoverScaleAnims[item] },
           {
             rotateX: rotationXAnims[item].interpolate({
               inputRange: [-1, 1],
@@ -417,42 +501,66 @@ export default function LetterGridScreen() {
         style={[
           styles.glowContainer,
           {
-            shadowOpacity: glowAnims[item].interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 0.8],
-            }),
-            shadowRadius: glowAnims[item].interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 20],
-            }),
+            shadowOpacity: Animated.add(
+              glowAnims[item].interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.8],
+              }),
+              hoverGlowAnims[item].interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.6],
+              })
+            ),
+            shadowRadius: Animated.add(
+              glowAnims[item].interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 20],
+              }),
+              hoverGlowAnims[item].interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 15],
+              })
+            ),
           },
         ]}
       >
-        <Pressable
-          style={({ pressed }) => [
-            styles.letterButton,
-            { backgroundColor: RAINBOW[index % RAINBOW.length], borderColor: COLORS.white },
-            pressed && styles.letterButtonPressed,
-            highContrast && styles.letterButtonHighContrast,
-          ]}
-          accessibilityLabel={`Letter ${item}`}
-          accessibilityRole="button"
-          onPress={() => handleLetterPress(item)}
-          onPressIn={() => {
-            handlePressIn(item);
-            startWobble(item);
-            startGlow(item);
-            startColorWave(item);
-            start3DRotation(item);
-          }}
-          onPressOut={() => {
-            handlePressOut(item);
-            stopWobble(item);
-            stopGlow(item);
-            stopColorWave(item);
-            stop3DRotation(item);
-          }}
-        >
+        <Animated.View style={[
+          styles.letterButton,
+          { 
+            backgroundColor: RAINBOW[index % RAINBOW.length],
+            borderWidth: hoverBorderAnims[item].interpolate({
+              inputRange: [0, 1],
+              outputRange: [2, 4],
+            }),
+            borderColor: hoverBorderAnims[item].interpolate({
+              inputRange: [0, 1],
+              outputRange: [COLORS.white, COLORS.accent],
+            }),
+          },
+          highContrast && styles.letterButtonHighContrast,
+        ]}>
+          <Pressable
+            style={[styles.pressableArea]}
+            accessibilityLabel={`Letter ${item}`}
+            accessibilityRole="button"
+            onPress={() => handleLetterPress(item)}
+            onPressIn={() => {
+              handlePressIn(item);
+              startWobble(item);
+              startGlow(item);
+              startColorWave(item);
+              start3DRotation(item);
+            }}
+            onPressOut={() => {
+              handlePressOut(item);
+              stopWobble(item);
+              stopGlow(item);
+              stopColorWave(item);
+              stop3DRotation(item);
+            }}
+            onHoverIn={() => handleLetterHoverIn(item)}
+            onHoverOut={() => handleLetterHoverOut(item)}
+          >
           <Text style={styles.letterEmoji}>{LETTER_EMOJI[item]}</Text>
           <View style={styles.letterContainer}>
             <Animated.Text 
@@ -476,7 +584,8 @@ export default function LetterGridScreen() {
               {item.toLowerCase()}
             </Animated.Text>
           </View>
-        </Pressable>
+          </Pressable>
+        </Animated.View>
       </Animated.View>
     </Animated.View>
   );
@@ -637,6 +746,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 6,
     transform: [{ scale: 1 }],
+  },
+  pressableArea: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   letterButtonPressed: {
     transform: [{ scale: 0.9 }],
