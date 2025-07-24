@@ -717,6 +717,7 @@ export default function LetterGridScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item}
         contentContainerStyle={styles.gridContainer}
+        style={styles.letterGrid}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
           { useNativeDriver: true }
@@ -779,8 +780,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 20,
+    paddingTop: 120, // Add top padding to avoid header overlap
     paddingBottom: 40,
-    zIndex: 1,
+    zIndex: 15, // Higher than header zIndex: 10
+  },
+  letterGrid: {
+    flex: 1,
+    zIndex: 15, // Ensure FlatList is above header
   },
   letterButton: {
     width: BUTTON_SIZE,
